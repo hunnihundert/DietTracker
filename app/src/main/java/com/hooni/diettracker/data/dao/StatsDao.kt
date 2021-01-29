@@ -1,9 +1,6 @@
 package com.hooni.diettracker.data.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.hooni.diettracker.data.Stats
 import kotlinx.coroutines.flow.Flow
 
@@ -13,9 +10,12 @@ interface StatsDao {
     @Query("SELECT * FROM stats")
     fun getAllStats(): Flow<List<Stats>>
 
-    @Insert
-    fun insertStats(stats: Stats)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStats(stats: Stats)
 
     @Delete
-    fun deleteStats(stats: Stats)
+    suspend fun deleteStats(stats: Stats)
+
+    @Update
+    suspend fun updateStats(stats: Stats)
 }
