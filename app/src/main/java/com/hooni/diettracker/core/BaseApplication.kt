@@ -11,7 +11,6 @@ import org.koin.core.context.stopKoin
 class BaseApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        stopKoin()
         startKoin {
             androidContext(this@BaseApplication)
             modules(
