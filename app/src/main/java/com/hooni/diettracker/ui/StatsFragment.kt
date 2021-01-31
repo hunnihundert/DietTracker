@@ -7,15 +7,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import com.hooni.diettracker.data.Stats
+import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.databinding.FragmentStatsBinding
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class StatsFragment : Fragment() {
 
     private lateinit var binding: FragmentStatsBinding
     private val mainViewModel: MainViewModel by viewModels()
 
-    private val stats = mutableListOf<Stats>()
+    private val stats = mutableListOf<Stat>()
 
     override fun onCreateView(
         inflater: LayoutInflater,

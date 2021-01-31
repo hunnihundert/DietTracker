@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Stats(
+data class Stat(
     val weight: Double,
     val waist: Double,
     val kCal: Double,

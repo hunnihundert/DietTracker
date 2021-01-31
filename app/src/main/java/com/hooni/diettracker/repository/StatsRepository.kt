@@ -1,12 +1,24 @@
 package com.hooni.diettracker.repository
 
-import com.hooni.diettracker.data.Stats
+import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.data.dao.StatsDao
 import kotlinx.coroutines.flow.Flow
 
-class StatsRepository(private val statsDao: StatsDao) {
+class StatsRepository(private val statsDao: StatsDao): Repository {
 
-    fun getAllStats(): Flow<List<Stats>> {
+    override fun getAllStats(): Flow<List<Stat>> {
         return statsDao.getAllStats()
+    }
+
+    override suspend fun insertStat(stat: Stat){
+        statsDao.insertStat(stat)
+    }
+
+    override suspend fun deleteStat(stat: Stat) {
+        statsDao.deleteStat(stat)
+    }
+
+    override suspend fun updateStat(stat: Stat) {
+        statsDao.updateStat(stat)
     }
 }

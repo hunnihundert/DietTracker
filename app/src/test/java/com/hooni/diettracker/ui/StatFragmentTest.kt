@@ -10,7 +10,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 
-class StatsFragmentTest: KoinTest {
+class StatFragmentTest: KoinTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()

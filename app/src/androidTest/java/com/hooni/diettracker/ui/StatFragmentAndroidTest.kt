@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.hooni.diettracker.data.Stats
+import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.data.dao.StatsDao
 import com.hooni.diettracker.data.database.StatsDatabase
 import com.hooni.diettracker.getOrAwaitValue
@@ -21,11 +21,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
-import org.koin.test.KoinTest
 import org.koin.test.inject
 
 @RunWith(AndroidJUnit4::class)
-class tatsFragmentAndroidTest: AutoCloseKoinTest() {
+class StatFragmentAndroidTest: AutoCloseKoinTest() {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -75,8 +74,8 @@ class tatsFragmentAndroidTest: AutoCloseKoinTest() {
 
     @Test
     fun checkIfGivenNoStatsViewModelReturnsEmptyList() {
-        var emptyList = listOf(Stats(99.9,88.8, 5555.0,"date"))
-        emptyList = mainViewModel.stats.getOrAwaitValue()
+        var emptyList = listOf(Stat(99.9,88.8, 5555.0,"date"))
+        emptyList = mainViewModel.stat.getOrAwaitValue()
          assertThat(emptyList).isEmpty()
     }
 }

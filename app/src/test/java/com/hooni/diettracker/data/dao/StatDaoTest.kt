@@ -1,14 +1,11 @@
 package com.hooni.diettracker.data.dao
 
-import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.asLiveData
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.hooni.diettracker.data.Stats
+import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.data.database.StatsDatabase
-import com.hooni.diettracker.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
@@ -19,11 +16,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class StatsDaoTest {
+class StatDaoTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -31,9 +27,9 @@ class StatsDaoTest {
     private lateinit var database: StatsDatabase
     private lateinit var dao: StatsDao
 
-    private val mockStats1 = Stats(71.1,81.1,2111.1,"date1",1)
-    private val mockStats2 = Stats(42.2,82.2,2222.2,"date2",2)
-    private val mockStats3 = Stats(53.3,83.3,2333.3,"date3",3)
+    private val mockStat1 = Stat(71.1,81.1,2111.1,"date1",1)
+    private val mockStat2 = Stat(42.2,82.2,2222.2,"date2",2)
+    private val mockStat3 = Stat(53.3,83.3,2333.3,"date3",3)
 
 
     @Before
@@ -55,52 +51,60 @@ class StatsDaoTest {
 
     @Test
     fun insertItemIntoDatabase() = runBlockingTest {
-        dao.insertStats(mockStats1)
+        dao.insertStat(mockStat1)
         val allStats = dao.getAllStats().first()
-        assertThat(allStats).contains(mockStats1)
+        assertThat(allStats).contains(mockStat1)
     }
 
     @Test
-    fun insertAndDeleteItemFromDatabase() = runBlockingTest {
-        dao.insertStats(mockStats1)
-        dao.insertStats(mockStats2)
-        dao.insertStats(mockStats3)
+    fun insertItemsAndDeleteItemsFromDatabase() = runBlockingTest {
+        dao.insertStat(mockStat1)
+        dao.insertStat(mockStat2)
+        dao.insertStat(mockStat3)
         var statList = dao.getAllStats().first()
-        assertThat(statList).contains(mockStats1)
+        assertThat(statList).contains(mockStat1)
 
-        dao.deleteStats(mockStats1)
+        dao.deleteStat(mockStat1)
         statList = dao.getAllStats().first()
-        assertThat(statList).doesNotContain(mockStats1)
-        assertThat(statList).containsExactly(mockStats2,mockStats3)
+        assertThat(statList).doesNotContain(mockStat1)
+        assertThat(statList).containsExactly(mockStat2,mockStat3)
 
-        dao.deleteStats(mockStats2)
+        dao.deleteStat(mockStat2)
         statList = dao.getAllStats().first()
-        assertThat(statList).doesNotContain(mockStats2)
-        assertThat(statList).containsExactly(mockStats3)
+        assertThat(statList).doesNotContain(mockStat2)
+        assertThat(statList).containsExactly(mockStat3)
 
-        dao.deleteStats(mockStats3)
+        dao.deleteStat(mockStat3)
         statList = dao.getAllStats().first()
         assertThat(statList).isEmpty()
     }
 
     @Test
-    fun insertItemsAndGetAllStatsFromDatabase() = runBlockingTest {
-        dao.insertStats(mockStats1)
-        dao.insertStats(mockStats2)
-        dao.insertStats(mockStats3)
+    fun insertItemsIntoDatabase() = runBlockingTest {
+        dao.insertStat(mockStat1)
+        dao.insertStat(mockStat2)
+        dao.insertStat(mockStat3)
         val allStats = dao.getAllStats().first()
-        assertThat(allStats).containsExactly(mockStats1, mockStats2, mockStats3)
+        assertThat(allStats).containsExactly(mockStat1, mockStat2, mockStat3)
     }
 
     @Test
-    fun insertItemAndUpdate() = runBlockingTest {
-        dao.insertStats(mockStats1)
+    fun insertItemAndUpdateItemInDatabase() = runBlockingTest {
+        dao.insertStat(mockStat1)
         val updatedWeight = 55.5
         val updatedKCal = 2222.2
-        val updatedStat = Stats(updatedWeight,81.1,updatedKCal,"date1",1)
-        dao.updateStats(updatedStat)
+        val updatedStat = Stat(updatedWeight,81.1,updatedKCal,"date1",1)
+        dao.updateStat(updatedStat)
         val allStats = dao.getAllStats().first()
         assertThat(allStats[0].weight).isEqualTo(updatedWeight)
         assertThat(allStats[0].kCal).isEqualTo(updatedKCal)
+    }
+
+    @Test
+    fun insertItemAndUpdateNonExistingItem() = runBlockingTest{
+        dao.insertStat(mockStat1)
+        dao.updateStat(mockStat2)
+        val allStats = dao.getAllStats().first()
+        assertThat(allStats[0]).isEqualTo(mockStat1)
     }
 }

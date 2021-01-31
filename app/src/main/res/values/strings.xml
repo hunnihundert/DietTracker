@@ -10,4 +10,7 @@
     <string name="button_input_confirm">Confirm</string>
     <string name="textInputLayout_input_kcal_hint">Enter Consumed KCal</string>
     <string name="contentDescription_fab_stats_addStat">Add stat</string>
+
+    <string name="errorMessage_viewModel_emptyField">Field is empty. Please fill out all fields.</string>
+    <string name="errorMessage_viewModel_invalidInput">Invalid input. Please enter numbers only.</string>
 </resources>
