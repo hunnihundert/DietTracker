@@ -1,11 +1,11 @@
 package com.hooni.diettracker.data.dao
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.data.database.StatsDatabase
+import com.hooni.diettracker.di.testDatabaseModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
@@ -14,18 +14,23 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.loadKoinModules
+import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class StatDaoTest {
+class StatDaoTest : KoinTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var database: StatsDatabase
-    private lateinit var dao: StatsDao
+    private val database: StatsDatabase by inject()
+    private val dao: StatsDao by inject()
 
     private val mockStat1 = Stat(71.1,81.1,2111.1,"date1",1)
     private val mockStat2 = Stat(42.2,82.2,2222.2,"date2",2)
@@ -34,13 +39,11 @@ class StatDaoTest {
 
     @Before
     fun setUp() {
-        database = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            StatsDatabase::class.java
-        )
-            .allowMainThreadQueries()
-            .build()
-        dao = database.provideStatsDao()
+
+        startKoin {
+            androidContext(ApplicationProvider.getApplicationContext())
+        }
+        loadKoinModules(testDatabaseModule)
     }
 
     @After

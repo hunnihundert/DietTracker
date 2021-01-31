@@ -20,7 +20,6 @@ val repositoryModule = module {
 val databaseModule = module {
     single { provideStatsDatabase(get()) }
     single { provideStatsDao(get()) }
-
 }
 
 private fun provideMainViewModel(statsRepository: StatsRepository): MainViewModel {
