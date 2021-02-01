@@ -1,11 +1,9 @@
-package com.hooni.diettracker.ui
+package com.hooni.diettracker.ui.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.*
 import com.hooni.diettracker.R
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.repository.Repository
-import com.hooni.diettracker.repository.StatsRepository
 import com.hooni.diettracker.util.Event
 import com.hooni.diettracker.util.Resource
 import kotlinx.coroutines.launch

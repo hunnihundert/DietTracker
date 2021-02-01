@@ -5,13 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.hooni.diettracker.databinding.FragmentInputBinding
+import com.hooni.diettracker.ui.viewmodel.MainViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class InputFragment : Fragment() {
 
     private lateinit var binding: FragmentInputBinding
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,

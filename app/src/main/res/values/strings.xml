@@ -13,4 +13,8 @@
 
     <string name="errorMessage_viewModel_emptyField">Field is empty. Please fill out all fields.</string>
     <string name="errorMessage_viewModel_invalidInput">Invalid input. Please enter numbers only.</string>
+
+    <string name="textView_listItem_weight">Weight: %1s</string>
+    <string name="textView_listItem_waist">Waist: %1s</string>
+    <string name="textView_listItem_kCal">kCal: %1s</string>
 </resources>

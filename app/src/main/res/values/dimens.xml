@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textSize_listItem_stat">16sp</dimen>
+    <dimen name="textSize_listItem_date">20sp</dimen>
+    <dimen name="textSize_fragmentStats_date">24sp</dimen>
+</resources>

@@ -6,6 +6,7 @@ import com.hooni.diettracker.MainCoroutineRule
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.getOrAwaitValue
 import com.hooni.diettracker.repository.FakeStatsRepository
+import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.Status
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runBlockingTest

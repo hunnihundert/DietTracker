@@ -5,7 +5,7 @@ import androidx.room.Room
 import com.hooni.diettracker.data.dao.StatsDao
 import com.hooni.diettracker.data.database.StatsDatabase
 import com.hooni.diettracker.repository.StatsRepository
-import com.hooni.diettracker.ui.MainViewModel
+import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
