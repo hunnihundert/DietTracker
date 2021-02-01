@@ -5,19 +5,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.databinding.FragmentStatsBinding
+import com.hooni.diettracker.ui.adapter.StatsAdapter
+import com.hooni.diettracker.ui.viewmodel.MainViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StatsFragment : Fragment() {
 
     private lateinit var binding: FragmentStatsBinding
-    val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModel()
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var statsAdapter: StatsAdapter
+    private lateinit var layoutManager: LinearLayoutManager
+
+    private val stats = mutableListOf<Stat>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentStatsBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
@@ -25,7 +38,25 @@ class StatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initObserver()
+        initUi()
     }
+
+    private fun initObserver() {
+        mainViewModel.stats.observe(viewLifecycleOwner, Observer{ statList ->
+            stats.addAll(statList)
+        })
+    }
+
+    private fun initUi() {
+        statsAdapter = StatsAdapter(stats)
+        layoutManager = LinearLayoutManager(requireContext())
+        recyclerView = binding.recyclerViewStatsData
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = statsAdapter
+
+    }
+
 
 
 }

@@ -7,14 +7,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.anychart.AnyChartView
-            android:id="@+id/anyChartView_stats_mainGraph"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_height="200dp" />
+<!--        <com.anychart.AnyChartView-->
+<!--            android:id="@+id/anyChartView_stats_mainGraph"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            tools:layout_height="200dp" />-->
 
         <LinearLayout
             android:id="@+id/linearLayout_stats_dates"
@@ -23,10 +23,14 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/anyChartView_stats_mainGraph">
+            app:layout_constraintTop_toTopOf="parent">
+<!--            app:layout_constraintTop_toBottomOf="@id/anyChartView_stats_mainGraph">-->
+
 
             <TextView
                 android:id="@+id/textView_stats_startDate"
+                android:textSize="@dimen/textSize_fragmentStats_date"
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -34,6 +38,8 @@
 
             <TextView
                 android:id="@+id/textView_stats_endDate"
+                android:textSize="@dimen/textSize_fragmentStats_date"
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -47,9 +53,18 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_weight=""
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/linearLayout_stats_dates" />
+            app:layout_constraintTop_toBottomOf="@id/linearLayout_stats_dates"
+            tools:listitem="@layout/list_item_stats"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_stats_addStat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:src="@drawable/ic_add"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/contentDescription_fab_stats_addStat" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

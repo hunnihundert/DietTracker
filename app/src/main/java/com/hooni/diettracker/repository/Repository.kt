@@ -1,21 +1,15 @@
-package com.hooni.diettracker.data.dao
+package com.hooni.diettracker.repository
 
-import androidx.room.*
 import com.hooni.diettracker.data.Stat
 import kotlinx.coroutines.flow.Flow
 
-@Dao
-interface StatsDao {
+interface Repository {
 
-    @Query("SELECT * FROM stat")
     fun getAllStats(): Flow<List<Stat>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStat(stat: Stat)
 
-    @Delete
     suspend fun deleteStat(stat: Stat)
 
-    @Update
     suspend fun updateStat(stat: Stat)
 }
