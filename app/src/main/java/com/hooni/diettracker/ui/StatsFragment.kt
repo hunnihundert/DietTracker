@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.databinding.FragmentStatsBinding
 import com.hooni.diettracker.ui.adapter.StatsAdapter
@@ -23,6 +25,10 @@ class StatsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var statsAdapter: StatsAdapter
     private lateinit var layoutManager: LinearLayoutManager
+
+    private lateinit var addStats: FloatingActionButton
+
+    private lateinit var addStatFragment: DialogFragment
 
     private val stats = mutableListOf<Stat>()
 
@@ -55,6 +61,13 @@ class StatsFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = statsAdapter
 
+        addStats = binding.fabStatsAddStat
+        addStats.setOnClickListener(addStatOnClickListener)
+    }
+
+    private val addStatOnClickListener = View.OnClickListener {
+        addStatFragment = AddStatFragment()
+        addStatFragment.show(requireActivity().supportFragmentManager,"addStatFragment")
     }
 
 

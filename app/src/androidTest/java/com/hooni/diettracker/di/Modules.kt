@@ -2,22 +2,22 @@ package com.hooni.diettracker.di
 
 import android.content.Context
 import androidx.room.Room
+import com.hooni.diettracker.FakeStatsRepository
 import com.hooni.diettracker.data.dao.StatsDao
 import com.hooni.diettracker.data.database.StatsDatabase
-import com.hooni.diettracker.repository.FakeStatsRepository
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import org.koin.dsl.module
 
-val testDatabaseModule = module {
+val androidTestDatabaseModule = module {
     single { provideFakeStatsDatabase(get()) }
     single { provideFakeStatsDao(get()) }
 }
 
-val testViewModelModule = module {
+val androidTestViewModelModule = module {
     single { provideFakeMainViewModel(get()) }
 }
 
-val testRepositoryModule = module {
+val androidTestRepositoryModule = module {
     single { provideFakeStatsRepository() }
 }
 
