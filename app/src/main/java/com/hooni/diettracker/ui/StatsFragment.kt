@@ -1,6 +1,7 @@
 package com.hooni.diettracker.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,6 +67,7 @@ class StatsFragment : Fragment() {
     }
 
     private val addStatOnClickListener = View.OnClickListener {
+        Log.d("add fragment", "onStart: ")
         addStatFragment = AddStatFragment()
         addStatFragment.show(requireActivity().supportFragmentManager,"addStatFragment")
     }

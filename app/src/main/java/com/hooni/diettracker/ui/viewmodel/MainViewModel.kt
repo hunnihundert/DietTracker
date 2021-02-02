@@ -22,6 +22,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
     val waist = MutableLiveData<String>()
     val kCal = MutableLiveData<String>()
     val date = MutableLiveData<String>()
+    val time = MutableLiveData<String>()
 
     private fun insertStatIntoDatabase(stat: Stat) {
         viewModelScope.launch {
