@@ -50,12 +50,16 @@ class StatsFragment : Fragment() {
     }
 
     private fun initObserver() {
-        mainViewModel.stats.observe(viewLifecycleOwner, Observer{ statList ->
+        mainViewModel.stats.observe(viewLifecycleOwner, Observer { statList ->
+            Log.d(TAG, "initObserver: $statList")
+            stats.clear()
             stats.addAll(statList)
+            statsAdapter.notifyDataSetChanged()
         })
     }
 
     private fun initUi() {
+        Log.d(TAG, "initUi:")
         statsAdapter = StatsAdapter(stats)
         layoutManager = LinearLayoutManager(requireContext())
         recyclerView = binding.recyclerViewStatsData
@@ -67,11 +71,13 @@ class StatsFragment : Fragment() {
     }
 
     private val addStatOnClickListener = View.OnClickListener {
-        Log.d("add fragment", "onStart: ")
         addStatFragment = AddStatFragment()
-        addStatFragment.show(requireActivity().supportFragmentManager,"addStatFragment")
+        addStatFragment.show(requireActivity().supportFragmentManager, "addStatFragment")
     }
 
-
+    companion object {
+        //private const val TAG = "StatsFragment"
+        private const val TAG = "MOCKING"
+    }
 
 }

@@ -1,11 +1,15 @@
 package com.hooni.diettracker.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
 import com.hooni.diettracker.data.dao.StatsDao
 import com.hooni.diettracker.data.database.StatsDatabase
 import com.hooni.diettracker.repository.FakeStatsRepository
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
+import org.koin.android.ext.koin.androidApplication
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val testDatabaseModule = module {
@@ -14,7 +18,7 @@ val testDatabaseModule = module {
 }
 
 val testViewModelModule = module {
-    single { provideFakeMainViewModel(get()) }
+    single { provideFakeMainViewModel(get(),androidApplication()) }
 }
 
 val testRepositoryModule = module {
@@ -34,8 +38,8 @@ private fun provideFakeStatsDao(statsDatabase: StatsDatabase): StatsDao {
     return statsDatabase.provideStatsDao()
 }
 
-private fun provideFakeMainViewModel(fakeStatsRepository: FakeStatsRepository): MainViewModel {
-    return MainViewModel(fakeStatsRepository)
+private fun provideFakeMainViewModel(fakeStatsRepository: FakeStatsRepository, application: Application): MainViewModel {
+    return MainViewModel(fakeStatsRepository, application)
 }
 
 private fun provideFakeStatsRepository(): FakeStatsRepository {

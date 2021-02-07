@@ -9,5 +9,6 @@ data class Stat(
     val waist: Double,
     val kCal: Double,
     val date: String,
-    @PrimaryKey(autoGenerate = true) val id: Int = 1
+    val time: String,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0
 )

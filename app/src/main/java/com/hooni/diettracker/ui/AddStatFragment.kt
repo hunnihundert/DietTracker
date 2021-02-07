@@ -3,20 +3,20 @@ package com.hooni.diettracker.ui
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
-import com.hooni.diettracker.R
 import com.hooni.diettracker.databinding.FragmentInputBinding
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.pickerdialogs.TimePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
+import com.hooni.diettracker.util.DateAndTime
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -28,6 +28,8 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
 
     private lateinit var date: TextView
     private lateinit var time: TextView
+
+    private lateinit var confirm: Button
 
     override fun onStart() {
         super.onStart()
@@ -42,6 +44,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentInputBinding.inflate(inflater, container, false)
+        binding.viewModel = mainViewModel
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
@@ -54,35 +57,36 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     private fun initUi() {
         date = binding.textViewInputDate
         time = binding.textViewInputTime
+        confirm = binding.buttonInputConfirm
 
-        val currentDate = Calendar.getInstance()
-        val currentHour = currentDate.get(Calendar.HOUR_OF_DAY)
-        val currentMinute = currentDate.get(Calendar.MINUTE)
-        val currentDayOfTheMonth = currentDate.get(Calendar.DAY_OF_MONTH)
-        val currentMonth = currentDate.get(Calendar.MONTH)
-        val currentYear = currentDate.get(Calendar.YEAR)
+        val calendar = Calendar.getInstance()
+        val currentDateAndTime = DateAndTime.fromCalendar(calendar)
 
-        date.text = getString(R.string.formatted_date, currentDayOfTheMonth, currentMonth, currentYear)
-        time.text = getString(R.string.formatted_time, currentHour, currentMinute)
+        mainViewModel.setDateAndTime(currentDateAndTime)
 
         date.setOnClickListener {
-            DatePickerDialogFragment(this, currentDayOfTheMonth, currentMonth, currentYear).show(
+            DatePickerDialogFragment(this, currentDateAndTime.day, currentDateAndTime.month, currentDateAndTime.year).show(
                 requireActivity().supportFragmentManager,
                 "datePicker"
             )
         }
         time.setOnClickListener {
             TimePickerDialogFragment(
-                this, currentHour, currentMinute
+                this, currentDateAndTime.hour, currentDateAndTime.minute
             ).show(requireActivity().supportFragmentManager, "timePicker")
+        }
+
+        confirm.setOnClickListener {
+            mainViewModel.insertStat()
+            dialog!!.hide()
         }
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
-        time.text = getString(R.string.formatted_time, hourOfDay, minute)
+        mainViewModel.setTime(hourOfDay, minute)
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        date.text = getString(R.string.formatted_date, dayOfMonth, month, year)
+        mainViewModel.setDate(dayOfMonth,month,year)
     }
 }

@@ -44,6 +44,7 @@
                 android:hint="@string/textInputLayout_input_weight_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditText_input_weight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@={viewModel.weight}"/>
@@ -73,6 +74,7 @@
                 android:hint="@string/textInputLayout_input_waist_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditText_input_waist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@={viewModel.waist}"/>
@@ -103,6 +105,7 @@
                 android:hint="@string/textInputLayout_input_kcal_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditText_input_kcal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@={viewModel.kCal}"/>
@@ -129,12 +132,14 @@
                 android:id="@+id/textView_input_date"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_weight="4"/>
+                android:layout_weight="4"
+                android:text="@={viewModel.date}"/>
             <TextView
                 android:id="@+id/textView_input_time"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_weight="4"/>
+                android:layout_weight="4"
+                android:text="@={viewModel.time}"/>
 
         </LinearLayout>
 
