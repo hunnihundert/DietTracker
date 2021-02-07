@@ -12,15 +12,15 @@
         tools:layout="@layout/fragment_stats">
         <action
             android:id="@+id/action_statsFragment_to_inputFragment"
-            app:destination="@id/inputFragment" />
+            app:destination="@id/addStatFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/inputFragment"
-        android:name="com.hooni.diettracker.ui.InputFragment"
-        android:label="InputFragment"
+    <dialog
+        android:id="@+id/addStatFragment"
+        android:name="com.hooni.diettracker.ui.AddStatFragment"
+        android:label="AddStatFragnebt"
         tools:layout="@layout/fragment_input">
         <action
             android:id="@+id/action_inputFragment_to_statsFragment"
             app:destination="@id/statsFragment" />
-    </fragment>
+    </dialog>
 </navigation>

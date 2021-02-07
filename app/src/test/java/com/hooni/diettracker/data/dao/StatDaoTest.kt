@@ -1,8 +1,8 @@
 package com.hooni.diettracker.data.dao
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.hooni.diettracker.core.TestBaseApplication
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.data.database.StatsDatabase
 import com.hooni.diettracker.di.testDatabaseModule
@@ -14,16 +14,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import org.koin.test.inject
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@Config(application = TestBaseApplication::class)
 class StatDaoTest : KoinTest {
 
     @get:Rule
@@ -32,17 +32,13 @@ class StatDaoTest : KoinTest {
     private val database: StatsDatabase by inject()
     private val dao: StatsDao by inject()
 
-    private val mockStat1 = Stat(71.1,81.1,2111.1,"date1",1)
-    private val mockStat2 = Stat(42.2,82.2,2222.2,"date2",2)
-    private val mockStat3 = Stat(53.3,83.3,2333.3,"date3",3)
+    private val mockStat1 = Stat(71.1,81.1,2111.1,"date1", "time",1)
+    private val mockStat2 = Stat(42.2,82.2,2222.2,"date2","time",2)
+    private val mockStat3 = Stat(53.3,83.3,2333.3,"date3","time",3)
 
 
     @Before
     fun setUp() {
-
-        startKoin {
-            androidContext(ApplicationProvider.getApplicationContext())
-        }
         loadKoinModules(testDatabaseModule)
     }
 
@@ -96,7 +92,7 @@ class StatDaoTest : KoinTest {
         dao.insertStat(mockStat1)
         val updatedWeight = 55.5
         val updatedKCal = 2222.2
-        val updatedStat = Stat(updatedWeight,81.1,updatedKCal,"date1",1)
+        val updatedStat = Stat(updatedWeight,81.1,updatedKCal,"date1","time",1)
         dao.updateStat(updatedStat)
         val allStats = dao.getAllStats().first()
         assertThat(allStats[0].weight).isEqualTo(updatedWeight)

@@ -12,15 +12,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/textView_listItemStats_date"
+        <LinearLayout
+            android:id="@+id/linearLayout_listItemStats_dateTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/textSize_listItem_date"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="31.12.2021" />
+            app:layout_constraintTop_toTopOf="parent">
+            <TextView
+                android:id="@+id/textView_listItemStats_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/textSize_listItem_date"
+                android:layout_weight="4"
+                tools:text="31.12.2021" />
+            <TextView
+                android:id="@+id/textView_listItemStats_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="end"
+                tools:text="14:10"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,7 +42,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textView_listItemStats_date">
+            app:layout_constraintTop_toBottomOf="@id/linearLayout_listItemStats_dateTime">
 
             <TextView
                 android:id="@+id/textView_listItemStats_weight"

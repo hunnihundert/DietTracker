@@ -16,7 +16,7 @@ class FakeStatsRepository: Repository {
     }
 
     override suspend fun insertStat(stat: Stat) {
-        val newStat = Stat(stat.weight,stat.waist,stat.kCal,stat.date,idCounter)
+        val newStat = Stat(stat.weight,stat.waist,stat.kCal,stat.date,stat.time, idCounter)
         idCounter++
         fakeStats.add(newStat)
     }
