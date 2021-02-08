@@ -12,11 +12,15 @@ import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
+import com.hooni.diettracker.R
 import com.hooni.diettracker.databinding.FragmentInputBinding
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.pickerdialogs.TimePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.DateAndTime
+import com.hooni.diettracker.util.Status
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -28,6 +32,10 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
 
     private lateinit var date: TextView
     private lateinit var time: TextView
+
+    private lateinit var weightTextInputLayout: TextInputLayout
+    private lateinit var waistTextInputLayout: TextInputLayout
+    private lateinit var kCalTextInputLayout: TextInputLayout
 
     private lateinit var confirm: Button
 
@@ -52,6 +60,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi()
+        initObserver()
     }
 
     private fun initUi() {
@@ -59,13 +68,22 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         time = binding.textViewInputTime
         confirm = binding.buttonInputConfirm
 
+        weightTextInputLayout = binding.textInputLayoutInputWeight
+        waistTextInputLayout = binding.textInputLayoutInputWaist
+        kCalTextInputLayout = binding.textInputLayoutInputKcal
+
         val calendar = Calendar.getInstance()
         val currentDateAndTime = DateAndTime.fromCalendar(calendar)
 
         mainViewModel.setDateAndTime(currentDateAndTime)
 
         date.setOnClickListener {
-            DatePickerDialogFragment(this, currentDateAndTime.day, currentDateAndTime.month, currentDateAndTime.year).show(
+            DatePickerDialogFragment(
+                this,
+                currentDateAndTime.day,
+                currentDateAndTime.month,
+                currentDateAndTime.year
+            ).show(
                 requireActivity().supportFragmentManager,
                 "datePicker"
             )
@@ -78,7 +96,6 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
 
         confirm.setOnClickListener {
             mainViewModel.insertStat()
-            dialog!!.hide()
         }
     }
 
@@ -87,6 +104,48 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        mainViewModel.setDate(dayOfMonth,month,year)
+        mainViewModel.setDate(dayOfMonth, month, year)
+    }
+
+    private fun initObserver() {
+        mainViewModel.insertStatStatus.observe(viewLifecycleOwner, { event ->
+            event.getContentIfNotHandled()?.let { resource ->
+                when (resource.status) {
+                    Status.ERROR -> {
+                        resource.message?.let { message ->
+                            view?.let {dialogView ->
+                                Snackbar.make(
+                                    dialogView,
+                                    message,
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        showErrorOnEmptyTextInputField()
+                    }
+                    Status.LOADING -> {
+                    }
+                    Status.SUCCESS -> {
+                        dialog!!.dismiss()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun showErrorOnEmptyTextInputField() {
+        if(weightTextInputLayout.editText?.text.isNullOrBlank()) {
+            weightTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
+        }
+        if(waistTextInputLayout.editText?.text.isNullOrBlank()) {
+            waistTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
+        }
+        if(kCalTextInputLayout.editText?.text.isNullOrBlank()) {
+            kCalTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
+        }
+    }
+
+    companion object {
+        private const val TAG = "AddStatFragment"
     }
 }
