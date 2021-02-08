@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.hooni.diettracker.ui.viewmodel.MainViewModel" />
@@ -47,7 +48,8 @@
                     android:id="@+id/textInputEditText_input_weight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={viewModel.weight}"/>
+                    android:inputType="numberDecimal"
+                    android:text="@={viewModel.weight}" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -77,7 +79,8 @@
                     android:id="@+id/textInputEditText_input_waist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={viewModel.waist}"/>
+                    android:inputType="numberDecimal"
+                    android:text="@={viewModel.waist}" />
 
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -108,7 +111,8 @@
                     android:id="@+id/textInputEditText_input_kcal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={viewModel.kCal}"/>
+                    android:inputType="numberDecimal"
+                    android:text="@={viewModel.kCal}" />
 
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -133,13 +137,14 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="4"
-                android:text="@={viewModel.date}"/>
+                android:text="@={viewModel.date}" />
+
             <TextView
                 android:id="@+id/textView_input_time"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="4"
-                android:text="@={viewModel.time}"/>
+                android:text="@={viewModel.time}" />
 
         </LinearLayout>
 
