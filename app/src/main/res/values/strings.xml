@@ -21,4 +21,6 @@
     <string name="formatted_time">%1d:%2d</string>
     <string name="formatted_date">%1d.%2d.%3d</string>
     <string name="textInputLayoutError_input_emptyField">Please fill out field.</string>
+
+    <string name="errorMessage_stats_invalidDate">Invalid Date Selection</string>
 </resources>
