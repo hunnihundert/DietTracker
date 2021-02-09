@@ -21,6 +21,7 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestBaseApplication::class)
@@ -57,5 +58,11 @@ class StatFragmentTest : KoinTest{
         mainViewModel.insertStat("70.2","88.5","2300","date","time")
         val listOfStats = mainViewModel.stats.getOrAwaitValue()
         assertThat(listOfStats.size).isEqualTo(3)
+    }
+
+
+    @Test
+    fun `WHEN changing the starting and ending date THEN then items that are within the frame will be shown`() {
+
     }
 }

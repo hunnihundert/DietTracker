@@ -19,6 +19,7 @@ import com.hooni.diettracker.databinding.FragmentInputBinding
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.pickerdialogs.TimePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
+import com.hooni.diettracker.util.ADD_STAT_DATE_PICKER
 import com.hooni.diettracker.util.DateAndTime
 import com.hooni.diettracker.util.Status
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -82,7 +83,8 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
                 this,
                 currentDateAndTime.day,
                 currentDateAndTime.month,
-                currentDateAndTime.year
+                currentDateAndTime.year,
+                ADD_STAT_DATE_PICKER
             ).show(
                 requireActivity().supportFragmentManager,
                 "datePicker"
