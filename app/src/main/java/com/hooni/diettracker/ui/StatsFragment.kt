@@ -2,7 +2,6 @@ package com.hooni.diettracker.ui
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,15 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.hooni.diettracker.R
@@ -31,6 +39,8 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
     private lateinit var binding: FragmentStatsBinding
     private val mainViewModel: MainViewModel by viewModel()
+
+    private lateinit var graph: LineChart
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var statsAdapter: StatsAdapter
@@ -59,6 +69,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         super.onViewCreated(view, savedInstanceState)
         initObserver()
         initUi()
+        initGraph()
     }
 
     private fun initObserver() {
@@ -68,6 +79,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             statsAdapter.notifyDataSetChanged()
             val newFilterDate = "${startingDate.text}///${endingDate.text}"
             statsAdapter.filter.filter(newFilterDate)
+            updateGraphData()
         })
     }
 
@@ -118,6 +130,57 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private val addStatOnClickListener = View.OnClickListener {
         addStatFragment = AddStatFragment()
         addStatFragment.show(requireActivity().supportFragmentManager, "addStatFragment")
+    }
+
+    private fun initGraph() {
+        graph = binding.chart
+        setGraphGeneralStyling()
+        setGraphAxisStyling()
+        updateGraphData()
+    }
+
+    private fun setGraphGeneralStyling() {
+        val graphDescription = Description()
+        graphDescription.isEnabled = false
+        graph.description = graphDescription
+        graph.setNoDataText(getString(R.string.noDataGraphDescription_stats_emptyGraph))
+        graph.setDrawBorders(true)
+    }
+
+    private fun setGraphAxisStyling() {
+        graph.axisRight.isEnabled = false
+        graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
+    }
+
+    private fun updateGraphData() {
+        setGraphData()
+        graph.notifyDataSetChanged()
+        graph.invalidate()
+    }
+
+    private fun setGraphData() {
+        val entries = mutableListOf<Entry>()
+        stats.forEachIndexed { index, stat ->
+            val entry = Entry(index.toFloat(),stat.waist.toFloat())
+            entries.add(entry)
+        }
+        val xAxisDescriptiveValues = stats.map { stat ->
+            stat.date.substringBeforeLast(".")
+        }
+        val valueFormatter = object: ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                return xAxisDescriptiveValues[value.toInt()]
+            }
+        }
+
+        val xAxis = graph.xAxis
+        xAxis.granularity = 1f
+        xAxis.valueFormatter = valueFormatter
+
+        val lineDataSet = LineDataSet(entries,"Waist")
+        val dataSet = mutableListOf<ILineDataSet>()
+        dataSet.add(lineDataSet)
+        graph.data = LineData(dataSet)
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
