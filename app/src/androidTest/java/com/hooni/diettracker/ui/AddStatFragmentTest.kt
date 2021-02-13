@@ -38,7 +38,7 @@ class AddStatFragmentTest {
     fun setUp() {
         instrumentationContext = ApplicationProvider.getApplicationContext()
         loadKoinModules(listOf(androidTestViewModelModule, androidTestRepositoryModule))
-        scenario = launchFragment<AddStatFragment>(themeResId = R.style.Theme_DietTracker)
+        scenario = launchFragment(themeResId = R.style.Theme_DietTracker)
     }
 
     @Test

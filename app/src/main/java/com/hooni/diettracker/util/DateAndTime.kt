@@ -8,7 +8,21 @@ data class DateAndTime(
     val year: Int,
     val hour: Int,
     val minute: Int
-) {
+): Comparable<DateAndTime> {
+
+    override fun compareTo(other: DateAndTime): Int {
+        if(year < other.year) return -1
+        if(year > other.year) return 1
+        if(month < other.month) return -1
+        if(month > other.month) return 1
+        if(day < other.day) return -1
+        if(day > other.day) return 1
+        if(hour < other.hour) return -1
+        if(hour > other.hour) return 1
+        if(minute < other.minute) return -1
+        if(minute > other.minute) return 1
+        return 0
+    }
 
     companion object {
         fun fromCalendar(calendar: Calendar): DateAndTime {
@@ -25,5 +39,45 @@ data class DateAndTime(
                 currentMinute
             )
         }
+
+        fun fromString(date: String = "", time: String = ""): DateAndTime {
+            val dateToSet = if(date=="") "01.01.1970" else date
+            val timeToSet = if(time=="") "00:00" else time
+
+            val day = dateToSet.substringBefore(".").trim().toInt()
+            val month = dateToSet.substringAfter(".").substringBefore(".").trim().toInt()
+            val year = dateToSet.substringAfterLast(".").trim().toInt()
+
+            val hour = timeToSet.substringBefore(":").trim().toInt()
+            val minute = timeToSet.substringAfter(":").trim().toInt()
+
+            return DateAndTime(day, month, year, hour, minute)
+
+        }
+    }
+
+    /** Changes the date by days/month/years/hours/minutes
+     *
+     *  @param amount Amount of units by which the date will be changed.
+     *  @param unit Unit by which the date will be changed. {@link com.hooni.diettracker.util.DateAndTime.Units}
+     *
+     *  @return Returns a new DateAndTime object with modified date/time.
+     */
+    fun DateAndTime.reduceBy(amount: Int, unit: Units) {
+        when(unit) {
+            Units.DAY -> {}
+            Units.MONTH -> {}
+            Units.YEAR -> {}
+            Units.HOUR -> {}
+            Units.MINUTE -> {}
+        }
+    }
+
+    enum class Units {
+        DAY,
+        MONTH,
+        YEAR,
+        HOUR,
+        MINUTE
     }
 }

@@ -9,7 +9,14 @@ class FakeStatsRepositoryAndroidTest: Repository {
 
     private val underlyingList = mutableListOf<Stat>()
     private val fakeStats = MutableLiveData(underlyingList)
-    private var idCounter = 1
+    private var idCounter = 4
+
+    init {
+        val firstStat = Stat(111.1,111.1,111.1,"1.1.2021","12:00",1)
+        val secondStat = Stat(222.2,222.2,222.2,"1.6.2021","12:00",2)
+        val thirdStat = Stat(333.3,333.3,333.3,"1.7.2021","12:00",3)
+        underlyingList.addAll(listOf(firstStat,secondStat,thirdStat))
+    }
 
     override fun getAllStats(): Flow<List<Stat>> {
         return fakeStats.asFlow()
