@@ -21,7 +21,6 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestBaseApplication::class)
@@ -37,7 +36,7 @@ class StatFragmentTest : KoinTest{
     @Before
     fun setUp() {
         loadKoinModules(listOf(testViewModelModule, testRepositoryModule))
-        scenario = launchFragmentInContainer<StatsFragment>(themeResId = R.style.Theme_DietTracker)
+        scenario = launchFragmentInContainer(themeResId = R.style.Theme_DietTracker)
     }
 
     @After

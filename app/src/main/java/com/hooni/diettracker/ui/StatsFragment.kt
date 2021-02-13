@@ -10,7 +10,6 @@ import android.widget.DatePicker
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -63,21 +62,30 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     private fun initObserver() {
-        mainViewModel.stats.observe(viewLifecycleOwner, Observer { statList ->
-            Log.d(TAG, "initObserver: $statList")
+        mainViewModel.stats.observe(viewLifecycleOwner, { statList ->
             stats.clear()
             stats.addAll(statList)
             statsAdapter.notifyDataSetChanged()
+            val newFilterDate = "${startingDate.text}///${endingDate.text}"
+            statsAdapter.filter.filter(newFilterDate)
         })
     }
 
     private fun initUi() {
+        initRecyclerView()
+        initStartEndDateTextViews()
+        initAddStatFab()
+    }
+
+    private fun initRecyclerView() {
         statsAdapter = StatsAdapter(stats)
         layoutManager = LinearLayoutManager(requireContext())
         recyclerView = binding.recyclerViewStatsData
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = statsAdapter
+    }
 
+    private fun initStartEndDateTextViews() {
         startingDate = binding.textViewStatsStartDate
         endingDate = binding.textViewStatsEndDate
 
@@ -100,7 +108,9 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
                 ENDING_DATE_PICKER
             ).show(parentFragmentManager,"datePicker")
         }
+    }
 
+    private fun initAddStatFab() {
         addStats = binding.fabStatsAddStat
         addStats.setOnClickListener(addStatOnClickListener)
     }
@@ -128,22 +138,28 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
     private fun setDate(day: Int, month: Int, year: Int, tag: String) {
         if(tag == STARTING_DATE_PICKER) {
-            val starting = DateAndTime.fromString(getString(R.string.formatted_date,day,month,year))
+            val starting = DateAndTime.fromString(getString(R.string.formatted_date,day,month+1,year))
             val ending = DateAndTime.fromString(endingDate.text.toString())
             if(starting > ending) {
                 startingDate.text = endingDate.text
                 Snackbar.make(requireView(),R.string.errorMessage_stats_invalidDate,Snackbar.LENGTH_SHORT).show()
             } else {
-                startingDate.text = getString(R.string.formatted_date,day,month+1,year)
+                val newStartingDate = getString(R.string.formatted_date,day,month+1,year)
+                startingDate.text = newStartingDate
+                val newFilterDate = "$newStartingDate///${endingDate.text}"
+                statsAdapter.filter.filter(newFilterDate)
             }
         } else {
-            val ending = DateAndTime.fromString(getString(R.string.formatted_date,day,month,year))
+            val ending = DateAndTime.fromString(getString(R.string.formatted_date,day,month+1,year))
             val starting = DateAndTime.fromString(startingDate.text.toString())
             if(starting > ending) {
                 endingDate.text = startingDate.text
                 Snackbar.make(requireView(),R.string.errorMessage_stats_invalidDate,Snackbar.LENGTH_SHORT).show()
             } else {
-                endingDate.text = getString(R.string.formatted_date,day,month+1,year)
+                val newEndingDate = getString(R.string.formatted_date,day,month+1,year)
+                endingDate.text = newEndingDate
+                val newFilterDate = "${startingDate.text}///$newEndingDate"
+                statsAdapter.filter.filter(newFilterDate)
             }
         }
     }

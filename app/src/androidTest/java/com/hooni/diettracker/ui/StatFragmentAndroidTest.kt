@@ -1,13 +1,12 @@
 package com.hooni.diettracker.ui
 
 import android.content.Context
-import android.content.res.Resources
 import android.util.Log
 import android.view.View
 import android.widget.DatePicker
-import android.widget.TextView
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -20,6 +19,7 @@ import com.hooni.diettracker.R
 import com.hooni.diettracker.di.androidTestRepositoryModule
 import com.hooni.diettracker.di.androidTestViewModelModule
 import com.hooni.diettracker.util.DateAndTime
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
@@ -40,8 +40,8 @@ class StatFragmentAndroidTest: KoinTest {
     @Before
     fun setUp() {
         instrumentationContext = ApplicationProvider.getApplicationContext()
-        loadKoinModules(listOf(androidTestViewModelModule,androidTestRepositoryModule))
-        scenario = launchFragmentInContainer<StatsFragment>(themeResId = R.style.Theme_DietTracker)
+        loadKoinModules(listOf(androidTestViewModelModule, androidTestRepositoryModule))
+        scenario = launchFragmentInContainer(themeResId = R.style.Theme_DietTracker)
     }
 
     @After
@@ -80,28 +80,50 @@ class StatFragmentAndroidTest: KoinTest {
             TAG,
             "dateAndTime: $startDateAndTime"
         )
-        val formattedEndDateString = instrumentationContext.getString(R.string.formatted_date,startDateAndTime.day,startDateAndTime.month+1,startDateAndTime.year)
-        val formattedStartDateString = instrumentationContext.getString(R.string.formatted_date,startDateAndTime.day-7,startDateAndTime.month+1,startDateAndTime.year)
+        val formattedEndDateString = instrumentationContext.getString(
+            R.string.formatted_date,
+            startDateAndTime.day,
+            startDateAndTime.month + 1,
+            startDateAndTime.year
+        )
+        val formattedStartDateString = instrumentationContext.getString(
+            R.string.formatted_date,
+            startDateAndTime.day - 7,
+            startDateAndTime.month + 1,
+            startDateAndTime.year
+        )
         Log.d(
             TAG,
             "dateAndTime: $formattedStartDateString // $formattedEndDateString"
         )
-        onView(withId(R.id.textView_stats_startDate)).check(matches(withText(formattedStartDateString)))
+        onView(withId(R.id.textView_stats_startDate)).check(
+            matches(
+                withText(
+                    formattedStartDateString
+                )
+            )
+        )
         onView(withId(R.id.textView_stats_endDate)).check(matches(withText(formattedEndDateString)))
     }
 
     @Test
     fun whenTappingTheStartingDateInStatFragment_thenTheDatePickerShowsUp() {
         onView(withId(R.id.textView_stats_startDate)).perform(click())
-        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).check(matches(
-            isDisplayed()))
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).check(
+            matches(
+                isDisplayed()
+            )
+        )
     }
 
     @Test
     fun whenTappingTheEndingDateInStatFragment_thenTheDatePickerShowsUp() {
         onView(withId(R.id.textView_stats_startDate)).perform(click())
-        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).check(matches(
-            isDisplayed()))
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).check(
+            matches(
+                isDisplayed()
+            )
+        )
     }
 
     @Test
@@ -116,17 +138,126 @@ class StatFragmentAndroidTest: KoinTest {
         }
 
         onView(withId(R.id.textView_stats_startDate)).perform(click())
-        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(PickerActions.setDate(currentYear, currentMonthMinusOne, currentDay))
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                currentYear,
+                currentMonthMinusOne,
+                currentDay
+            )
+        )
         onView(withText("OK")).perform(click())
-        val selectedDateAndTime = DateAndTime(currentDay,currentMonthMinusOne,currentYear,0,0)
-        val selectedDate = instrumentationContext.getString(R.string.formatted_date,selectedDateAndTime.day,selectedDateAndTime.month,selectedDateAndTime.year)
+        val selectedDateAndTime = DateAndTime(currentDay, currentMonthMinusOne, currentYear, 0, 0)
+        val selectedDate = instrumentationContext.getString(
+            R.string.formatted_date,
+            selectedDateAndTime.day,
+            selectedDateAndTime.month,
+            selectedDateAndTime.year
+        )
         onView(withId(R.id.textView_stats_startDate)).check(matches(withText(selectedDate)))
+    }
+
+    @Test
+    fun whenChangingTheDateRange_thenOnlyStatsWithinTheRangeAreVisible() {
+        // select date range: 2021/1/1 - 2021/7/2
+        onView(withId(R.id.textView_stats_startDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                1,
+                1
+            )
+        )
+        onView(withText("OK")).perform(click())
+        onView(withId(R.id.textView_stats_endDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                7,
+                2
+            )
+        )
+        onView(withText("OK")).perform(click())
+
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 111.1")))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 222.2")))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 333.3")))))
+
+        // select date range: 2021/1/1 - 2021/6/2
+        onView(withId(R.id.textView_stats_startDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                1,
+                1
+            )
+        )
+        onView(withText("OK")).perform(click())
+        onView(withId(R.id.textView_stats_endDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                6,
+                2
+            )
+        )
+        onView(withText("OK")).perform(click())
+
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 111.1")))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 222.2")))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 333.3"))))))
+
+        // select date range: 2021/5/1 - 2021/6/2
+        onView(withId(R.id.textView_stats_startDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                5,
+                1
+            )
+        )
+        onView(withText("OK")).perform(click())
+        onView(withId(R.id.textView_stats_endDate)).perform(click())
+        onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).perform(
+            PickerActions.setDate(
+                2021,
+                6,
+                2
+            )
+        )
+        onView(withText("OK")).perform(click())
+
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 111.1"))))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 222.2")))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 333.3"))))))
+    }
+
+    private fun hasItem(matcher: Matcher<View?>): Matcher<View?> {
+        return object : BoundedMatcher<View?, RecyclerView>(RecyclerView::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("has item: ")
+                matcher.describeTo(description)
+            }
+
+            override fun matchesSafely(view: RecyclerView): Boolean {
+                val adapter = view.adapter
+                for (position in 0 until adapter!!.itemCount) {
+                    val type = adapter.getItemViewType(position)
+                    val holder = adapter.createViewHolder(view, type)
+                    adapter.onBindViewHolder(holder, position)
+                    if (matcher.matches(holder.itemView)) {
+                        return true
+                    }
+                }
+                return false
+            }
+        }
     }
 
 
     companion object {
         private const val TAG = "StatFragmentAndroidTest"
     }
+
 
 
 }

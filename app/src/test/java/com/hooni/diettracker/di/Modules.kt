@@ -3,13 +3,11 @@ package com.hooni.diettracker.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
 import com.hooni.diettracker.data.dao.StatsDao
 import com.hooni.diettracker.data.database.StatsDatabase
 import com.hooni.diettracker.repository.FakeStatsRepository
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val testDatabaseModule = module {

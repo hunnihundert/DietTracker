@@ -1,6 +1,7 @@
 package com.hooni.diettracker.ui.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import com.hooni.diettracker.R
 import com.hooni.diettracker.data.Stat
@@ -122,7 +123,7 @@ class MainViewModel(private val repository: Repository, application: Application
         date.value = getApplication<Application>().resources.getString(
             R.string.formatted_date,
             dateAndTime.day,
-            dateAndTime.month,
+            dateAndTime.month+1,
             dateAndTime.year
         )
         time.value = getApplication<Application>().resources.getString(
@@ -130,5 +131,9 @@ class MainViewModel(private val repository: Repository, application: Application
             dateAndTime.hour,
             dateAndTime.minute
         )
+    }
+
+    companion object {
+        private const val TAG = "MainViewModel"
     }
 }
