@@ -90,12 +90,12 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         endingDate = binding.textViewStatsEndDate
 
         val calendar = Calendar.getInstance()
+
         val currentDateAndTime = DateAndTime.fromCalendar(calendar)
         val sevenDaysAgo = currentDateAndTime.day - 7
 
         startingDate.text = getString(R.string.formatted_date,sevenDaysAgo,currentDateAndTime.month+1,currentDateAndTime.year)
         endingDate.text = getString(R.string.formatted_date,currentDateAndTime.day,currentDateAndTime.month+1,currentDateAndTime.year)
-
         startingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(startingDate.text.toString())
             DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month-1, setDateAndTime.year,

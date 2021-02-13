@@ -32,7 +32,7 @@ import org.koin.test.KoinTest
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
-class StatFragmentAndroidTest: KoinTest {
+class StatFragmentAndroidTest : KoinTest {
 
     private lateinit var scenario: FragmentScenario<StatsFragment>
     private lateinit var instrumentationContext: Context
@@ -64,10 +64,7 @@ class StatFragmentAndroidTest: KoinTest {
             ), calendar.get(Calendar.MINUTE)
         )
         val currentDate = instrumentationContext.getString(
-            R.string.formatted_date, calendar.get(
-                Calendar.DAY_OF_MONTH
-            ), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR)
-        )
+            R.string.formatted_date, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
         onView(withId(R.id.textView_input_time)).check(matches(withText(currentTime)))
         onView(withId(R.id.textView_input_date)).check(matches(withText(currentDate)))
     }
@@ -75,35 +72,15 @@ class StatFragmentAndroidTest: KoinTest {
     @Test
     fun givenFreshStart_whenSeeingTheStatsFragment_thenTodayAnd7DaysEarlierIsShownInStartingEndingDate() {
         val calendar = Calendar.getInstance()
-        val startDateAndTime = DateAndTime.fromCalendar(calendar)
-        Log.d(
-            TAG,
-            "dateAndTime: $startDateAndTime"
-        )
-        val formattedEndDateString = instrumentationContext.getString(
+        val dateAndTime = DateAndTime.fromCalendar(calendar)
+        val formattedDateString = instrumentationContext.getString(
             R.string.formatted_date,
-            startDateAndTime.day,
-            startDateAndTime.month + 1,
-            startDateAndTime.year
+            dateAndTime.day-7,
+            dateAndTime.month+1,
+            dateAndTime.year
         )
-        val formattedStartDateString = instrumentationContext.getString(
-            R.string.formatted_date,
-            startDateAndTime.day - 7,
-            startDateAndTime.month + 1,
-            startDateAndTime.year
-        )
-        Log.d(
-            TAG,
-            "dateAndTime: $formattedStartDateString // $formattedEndDateString"
-        )
-        onView(withId(R.id.textView_stats_startDate)).check(
-            matches(
-                withText(
-                    formattedStartDateString
-                )
-            )
-        )
-        onView(withId(R.id.textView_stats_endDate)).check(matches(withText(formattedEndDateString)))
+
+        onView(withId(R.id.textView_stats_startDate)).check(matches(withText(formattedDateString)))
     }
 
     @Test
@@ -118,7 +95,7 @@ class StatFragmentAndroidTest: KoinTest {
 
     @Test
     fun whenTappingTheEndingDateInStatFragment_thenTheDatePickerShowsUp() {
-        onView(withId(R.id.textView_stats_startDate)).perform(click())
+        onView(withId(R.id.textView_stats_endDate)).perform(click())
         onView(withClassName(Matchers.equalTo(DatePicker::class.qualifiedName))).check(
             matches(
                 isDisplayed()
@@ -132,7 +109,7 @@ class StatFragmentAndroidTest: KoinTest {
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
         var currentYear = calendar.get(Calendar.YEAR)
         var currentMonthMinusOne = calendar.get(Calendar.MONTH)
-        if(currentMonthMinusOne == 0) {
+        if (currentMonthMinusOne == 0) {
             currentYear -= 1
             currentMonthMinusOne = 11
         }
@@ -204,7 +181,8 @@ class StatFragmentAndroidTest: KoinTest {
 
         onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 111.1")))))
         onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 222.2")))))
-        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 333.3"))))))
+        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 333.3")))))
+        )
 
         // select date range: 2021/5/1 - 2021/6/2
         onView(withId(R.id.textView_stats_startDate)).perform(click())
@@ -228,7 +206,13 @@ class StatFragmentAndroidTest: KoinTest {
 
         onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 111.1"))))))
         onView(withId(R.id.recyclerView_stats_data)).check(matches(hasItem(hasDescendant(withText("Waist: 222.2")))))
-        onView(withId(R.id.recyclerView_stats_data)).check(matches(not(hasItem(hasDescendant(withText("Waist: 333.3"))))))
+        onView(withId(R.id.recyclerView_stats_data)).check(
+            matches(not(hasItem(hasDescendant(withText("Waist: 333.3")
+                        )
+                    )
+                )
+            )
+        )
     }
 
     private fun hasItem(matcher: Matcher<View?>): Matcher<View?> {
@@ -250,14 +234,11 @@ class StatFragmentAndroidTest: KoinTest {
                 }
                 return false
             }
-        }
-    }
 
+            }
+        }
 
     companion object {
         private const val TAG = "StatFragmentAndroidTest"
     }
-
-
-
 }
