@@ -22,6 +22,7 @@ import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.ADD_STAT_DATE_PICKER
 import com.hooni.diettracker.util.DateAndTime
 import com.hooni.diettracker.util.Status
+import org.koin.android.ext.android.bind
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -38,6 +39,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     private lateinit var waistTextInputLayout: TextInputLayout
     private lateinit var kCalTextInputLayout: TextInputLayout
 
+    private lateinit var cancel: Button
     private lateinit var confirm: Button
 
     override fun onStart() {
@@ -68,6 +70,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         date = binding.textViewInputDate
         time = binding.textViewInputTime
         confirm = binding.buttonInputConfirm
+        cancel = binding.buttonInputCancel
 
         weightTextInputLayout = binding.textInputLayoutInputWeight
         waistTextInputLayout = binding.textInputLayoutInputWaist
@@ -97,8 +100,19 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         }
 
         confirm.setOnClickListener {
+            clearTextInputError()
             mainViewModel.insertStat()
         }
+
+        cancel.setOnClickListener {
+            dismiss()git
+        }
+    }
+
+    private fun clearTextInputError() {
+        weightTextInputLayout.error = ""
+        waistTextInputLayout.error = ""
+        kCalTextInputLayout.error = ""
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
@@ -134,6 +148,8 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
             }
         })
     }
+
+
 
     private fun showErrorOnEmptyTextInputField() {
         if(weightTextInputLayout.editText?.text.isNullOrBlank()) {
