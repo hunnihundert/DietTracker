@@ -55,6 +55,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/linearLayout_stats_dates"
             tools:listitem="@layout/list_item_stats"/>
+        <TextView
+            android:id="@+id/textView_stats_noResults"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:text="No results for reporting period. Add data or change date."
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayout_stats_dates"/>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_stats_addStat"
             android:layout_width="wrap_content"

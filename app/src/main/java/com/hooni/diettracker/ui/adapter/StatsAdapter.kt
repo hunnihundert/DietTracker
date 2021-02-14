@@ -7,6 +7,7 @@ import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.util.DateAndTime
+
 class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
 
     var displayedStats = mutableListOf<Stat>()
