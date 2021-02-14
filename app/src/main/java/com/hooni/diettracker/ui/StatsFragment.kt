@@ -12,6 +12,15 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.hooni.diettracker.R
@@ -32,12 +41,15 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private lateinit var binding: FragmentStatsBinding
     private val mainViewModel: MainViewModel by viewModel()
 
+    private lateinit var graph: LineChart
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var statsAdapter: StatsAdapter
     private lateinit var layoutManager: LinearLayoutManager
 
     private lateinit var startingDate: TextView
     private lateinit var endingDate: TextView
+    private lateinit var noDataTextView: TextView
 
     private lateinit var addStats: FloatingActionButton
 
@@ -59,21 +71,12 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         super.onViewCreated(view, savedInstanceState)
         initObserver()
         initUi()
-    }
-
-    private fun initObserver() {
-        mainViewModel.stats.observe(viewLifecycleOwner, { statList ->
-            stats.clear()
-            stats.addAll(statList)
-            statsAdapter.notifyDataSetChanged()
-            val newFilterDate = "${startingDate.text}///${endingDate.text}"
-            statsAdapter.filter.filter(newFilterDate)
-        })
+        initGraph()
     }
 
     private fun initUi() {
         initRecyclerView()
-        initStartEndDateTextViews()
+        initTextViews()
         initAddStatFab()
     }
 
@@ -83,19 +86,33 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         recyclerView = binding.recyclerViewStatsData
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = statsAdapter
+        statsAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onChanged() {
+                super.onChanged()
+                if (statsAdapter.displayedStats.isEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    noDataTextView.visibility = View.VISIBLE
+                } else {
+                    recyclerView.visibility = View.VISIBLE
+                    noDataTextView.visibility = View.GONE
+                }
+            }
+        })
     }
 
-    private fun initStartEndDateTextViews() {
+    private fun initTextViews() {
         startingDate = binding.textViewStatsStartDate
         endingDate = binding.textViewStatsEndDate
+        noDataTextView = binding.textViewStatsNoResults
 
         val calendar = Calendar.getInstance()
 
         val currentDateAndTime = DateAndTime.fromCalendar(calendar)
         val sevenDaysAgo = currentDateAndTime.day - 7
 
-        startingDate.text = getString(R.string.formatted_date,sevenDaysAgo,currentDateAndTime.month+1,currentDateAndTime.year)
-        endingDate.text = getString(R.string.formatted_date,currentDateAndTime.day,currentDateAndTime.month+1,currentDateAndTime.year)
+        mainViewModel.setStartingDate(sevenDaysAgo,currentDateAndTime.month,currentDateAndTime.year)
+        mainViewModel.setEndingDate(currentDateAndTime.day,currentDateAndTime.month,currentDateAndTime.year)
+
         startingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(startingDate.text.toString())
             DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month-1, setDateAndTime.year,
@@ -120,48 +137,116 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         addStatFragment.show(requireActivity().supportFragmentManager, "addStatFragment")
     }
 
+    private fun initGraph() {
+        graph = binding.chart
+        setGraphGeneralStyling()
+        setGraphAxisStyling()
+        updateGraphData()
+    }
+
+    private fun setGraphGeneralStyling() {
+        val graphDescription = Description()
+        graphDescription.isEnabled = false
+        graph.description = graphDescription
+        graph.setNoDataText(getString(R.string.noDataGraphDescription_stats_emptyGraph))
+        graph.setDrawBorders(true)
+    }
+
+    private fun setGraphAxisStyling() {
+        graph.axisRight.isEnabled = false
+        graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
+    }
+
+    private fun updateGraphData() {
+        setGraphData()
+        graph.notifyDataSetChanged()
+        graph.invalidate()
+    }
+
+    private fun setGraphData() {
+        val entries = mutableListOf<Entry>()
+
+        val startDateAndTime = DateAndTime.fromString(startingDate.text.toString())
+        val endDateAndTime = DateAndTime.fromString(endingDate.text.toString())
+
+        val resultList = stats.filter {
+            DateAndTime.fromString(it.date) in startDateAndTime..endDateAndTime
+        }
+
+        resultList.forEachIndexed { index, stat ->
+            val entry = Entry(index.toFloat(),stat.waist.toFloat())
+            entries.add(entry)
+        }
+        val xAxisDescriptiveValues = resultList.map { stat ->
+            stat.date.substringBeforeLast(".")
+        }
+        val valueFormatter = object: ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                if(value < 0f || value.toInt() >= xAxisDescriptiveValues.size) {
+                    if(xAxisDescriptiveValues.size == 1) return ""
+                    return super.getAxisLabel(value, axis)
+                }
+                return xAxisDescriptiveValues[value.toInt()]
+            }
+        }
+
+        val xAxis = graph.xAxis
+        xAxis.granularity = 1f
+        xAxis.valueFormatter = valueFormatter
+
+        val lineDataSet = LineDataSet(entries,"Waist")
+        val dataSet = mutableListOf<ILineDataSet>()
+        dataSet.add(lineDataSet)
+        graph.data = LineData(dataSet)
+    }
+
+    private fun initObserver() {
+        mainViewModel.stats.observe(viewLifecycleOwner, { statList ->
+            stats.clear()
+            stats.addAll(statList)
+            statsAdapter.notifyDataSetChanged()
+            updateDateFilter()
+            updateGraphData()
+        })
+
+        mainViewModel.startingDate.observe(viewLifecycleOwner, { changedStartingDate ->
+            startingDate.text = changedStartingDate
+            updateDateFilter()
+            updateGraphData()
+        })
+
+        mainViewModel.endingDate.observe(viewLifecycleOwner, { changedEndingDate ->
+            endingDate.text = changedEndingDate
+            updateDateFilter()
+            updateGraphData()
+        })
+
+        mainViewModel.dateInputError.observe(viewLifecycleOwner, { errorEvent ->
+            if(!errorEvent.hasBeenHandled) {
+                Snackbar.make(requireView(),errorEvent.getContentIfNotHandled().toString(),Snackbar.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun updateDateFilter() {
+        val newFilterDate = "${startingDate.text}///${endingDate.text}"
+        statsAdapter.filter.filter(newFilterDate)
+    }
+
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
             view?.let {
                 when(view.tag) {
                     STARTING_DATE_PICKER -> {
-                        setDate(dayOfMonth,month,year,STARTING_DATE_PICKER)
+                        mainViewModel.setStartingDate(dayOfMonth,month,year)
                     }
                     ENDING_DATE_PICKER -> {
-                        setDate(dayOfMonth,month,year, ENDING_DATE_PICKER)
+                        mainViewModel.setEndingDate(dayOfMonth,month, year)
                     }
                     ADD_STAT_DATE_PICKER -> {
                         // invalid
                     }
                 }
             }
-    }
-
-    private fun setDate(day: Int, month: Int, year: Int, tag: String) {
-        if(tag == STARTING_DATE_PICKER) {
-            val starting = DateAndTime.fromString(getString(R.string.formatted_date,day,month+1,year))
-            val ending = DateAndTime.fromString(endingDate.text.toString())
-            if(starting > ending) {
-                startingDate.text = endingDate.text
-                Snackbar.make(requireView(),R.string.errorMessage_stats_invalidDate,Snackbar.LENGTH_SHORT).show()
-            } else {
-                val newStartingDate = getString(R.string.formatted_date,day,month+1,year)
-                startingDate.text = newStartingDate
-                val newFilterDate = "$newStartingDate///${endingDate.text}"
-                statsAdapter.filter.filter(newFilterDate)
-            }
-        } else {
-            val ending = DateAndTime.fromString(getString(R.string.formatted_date,day,month+1,year))
-            val starting = DateAndTime.fromString(startingDate.text.toString())
-            if(starting > ending) {
-                endingDate.text = startingDate.text
-                Snackbar.make(requireView(),R.string.errorMessage_stats_invalidDate,Snackbar.LENGTH_SHORT).show()
-            } else {
-                val newEndingDate = getString(R.string.formatted_date,day,month+1,year)
-                endingDate.text = newEndingDate
-                val newFilterDate = "${startingDate.text}///$newEndingDate"
-                statsAdapter.filter.filter(newFilterDate)
-            }
-        }
     }
 
     companion object {
