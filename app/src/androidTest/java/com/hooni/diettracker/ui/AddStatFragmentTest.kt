@@ -77,4 +77,24 @@ class AddStatFragmentTest {
         onView(withClassName(Matchers.equalTo(TimePicker::class.qualifiedName))).check(matches(
             isDisplayed()))
     }
+
+    @Test
+    fun whenTappingAnEntryInTheRecyclerView_thenAnEditPopUpAppearsWithTheCurrentStatsOfTheEntryEntered() {
+
+    }
+
+    @Test
+    fun whenTappingAndEntryChangingTheStatsAndConfirming_thenTheSelectedEntryStatsAreChanged() {
+
+    }
+
+    @Test
+    fun whenTappingAndHoldingAnEntry_ThenTheActionMenuOpens() {
+
+    }
+
+    @Test
+    fun whenTappingHoldingAnEntryAndTappingTheDeleteIcon_thenTheEntryIsDeletedFromTheRecyclerView() {
+
+    }
 }
