@@ -93,8 +93,8 @@ dependencies {
     testImplementation "org.koin:koin-test:$koin_version"
     androidTestImplementation "org.koin:koin-test:$koin_version"
 
-    // AnyChart
-    implementation "com.github.AnyChart:AnyChart-Android:$chart_version"
+    // MP Chart
+    implementation "com.github.PhilJay:MPAndroidChart:$chart_version"
 
     // Lifecycle
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"

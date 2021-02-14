@@ -1,7 +1,6 @@
 package com.hooni.diettracker.ui.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.*
 import com.hooni.diettracker.R
 import com.hooni.diettracker.data.Stat
@@ -15,11 +14,11 @@ class MainViewModel(private val repository: Repository, application: Application
     AndroidViewModel(application) {
 
     private val _stats = repository.getAllStats().asLiveData()
-    val stats: LiveData<List<Stat>>
+    internal val stats: LiveData<List<Stat>>
         get() = _stats
 
     private val _insertStatStatus = MutableLiveData<Event<Resource<Stat>>>()
-    val insertStatStatus: LiveData<Event<Resource<Stat>>>
+    internal val insertStatStatus: LiveData<Event<Resource<Stat>>>
         get() = _insertStatStatus
 
     val weight = MutableLiveData<String>()
@@ -28,6 +27,17 @@ class MainViewModel(private val repository: Repository, application: Application
     val date = MutableLiveData<String>()
     val time = MutableLiveData<String>()
 
+    private val _startingDate = MutableLiveData<String>()
+    internal val startingDate: LiveData<String>
+        get() = _startingDate
+
+    private val _endingDate = MutableLiveData<String>()
+    internal val endingDate: LiveData<String>
+        get() = _endingDate
+
+    private val _dateInputError = MutableLiveData<Event<String>>()
+    internal val dateInputError: LiveData<Event<String>>
+        get() = _dateInputError
     /**
      * Calls insertStat in repository via coroutine in viewModelScope.
      *
@@ -131,6 +141,30 @@ class MainViewModel(private val repository: Repository, application: Application
             dateAndTime.hour,
             dateAndTime.minute
         )
+    }
+
+    internal fun setStartingDate(day: Int, month: Int, year: Int) {
+        val newStartingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month+1,year)
+        val newStarting = DateAndTime.fromString(newStartingDate)
+        val ending = DateAndTime.fromString(_endingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day+1,month+1,year))
+        if(newStarting > ending) {
+            //_startingDate.value = _endingDate.value
+            _dateInputError.value = Event(getApplication<Application>().resources.getString(R.string.errorMessage_stats_invalidDate))
+        } else {
+            _startingDate.value = newStartingDate
+        }
+    }
+
+    internal fun setEndingDate(day: Int, month: Int, year: Int) {
+        val newEndingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month+1,year)
+        val newEnding = DateAndTime.fromString(newEndingDate)
+        val starting = DateAndTime.fromString(_startingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day-1,month+1,year))
+        if(newEnding < starting) {
+            //_endingDate.value = _startingDate.value
+            _dateInputError.value = Event(getApplication<Application>().resources.getString(R.string.errorMessage_stats_invalidDate))
+        } else {
+            _endingDate.value = newEndingDate
+        }
     }
 
     companion object {

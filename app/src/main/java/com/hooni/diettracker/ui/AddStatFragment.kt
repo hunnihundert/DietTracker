@@ -105,7 +105,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         }
 
         cancel.setOnClickListener {
-            dismiss()git
+            dismiss()
         }
     }
 
