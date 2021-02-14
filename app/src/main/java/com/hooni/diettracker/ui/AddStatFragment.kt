@@ -97,8 +97,15 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         }
 
         confirm.setOnClickListener {
+            clearTextInputError()
             mainViewModel.insertStat()
         }
+    }
+
+    private fun clearTextInputError() {
+        weightTextInputLayout.error = ""
+        waistTextInputLayout.error = ""
+        kCalTextInputLayout.error = ""
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
@@ -134,6 +141,8 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
             }
         })
     }
+
+
 
     private fun showErrorOnEmptyTextInputField() {
         if(weightTextInputLayout.editText?.text.isNullOrBlank()) {
