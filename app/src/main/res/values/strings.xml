@@ -23,4 +23,5 @@
     <string name="textInputLayoutError_input_emptyField">Please fill out field.</string>
 
     <string name="errorMessage_stats_invalidDate">Invalid Date Selection</string>
+    <string name="button_input_cancel">Cancel</string>
 </resources>
