@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.*
 import android.widget.DatePicker
 import android.widget.TextView
-import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.selection.SelectionPredicates
@@ -35,7 +34,6 @@ import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
 // TODO: recyclerview liste anhand von datum sortieren
@@ -61,6 +59,9 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
     private lateinit var selectionTracker: SelectionTracker<Long>
     private var actionMode: ActionMode? = null
+    private lateinit var actionModeCallback: ActionMode.Callback
+
+    private val selectedItems = mutableListOf<Long>()
 
     private val stats = mutableListOf<Stat>()
 
@@ -82,9 +83,44 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     private fun initUi() {
+        initActionModeCallBack()
         initRecyclerView()
         initTextViews()
         initAddStatFab()
+
+    }
+
+    private fun initActionModeCallBack() {
+        actionModeCallback = object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                val inflater = mode.menuInflater
+                inflater.inflate(R.menu.action_mode_menu, menu)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                return false
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                return when (item.itemId) {
+                    R.id.action_mode_delete -> {
+                        // deleteCurrentItem
+                        selectionTracker.clearSelection()
+                        mode.finish()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode?) {
+                mode?.finish()
+                selectionTracker.clearSelection()
+                actionMode = null
+            }
+
+        }
     }
 
     private fun initRecyclerView() {
@@ -92,7 +128,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             val weight = stat.weight
             val waist = stat.waist
             val kCal = stat.kCal
-            val dateAndTime = DateAndTime.fromString(stat.date,stat.time)
+            val dateAndTime = DateAndTime.fromString(stat.date, stat.time)
 
             mainViewModel.setDateAndTime(dateAndTime)
             mainViewModel.weight.value = weight.toString()
@@ -101,7 +137,10 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             mainViewModel.editStatId = stat.id
 
             addStatFragment = AddStatFragment()
-            addStatFragment.show(requireActivity().supportFragmentManager, ADD_STAT_FRAGMENT_EDITING)
+            addStatFragment.show(
+                requireActivity().supportFragmentManager,
+                ADD_STAT_FRAGMENT_EDITING
+            )
         }
         statsAdapter = StatsAdapter(stats, editClickListener)
 
@@ -131,41 +170,32 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build()
 
-        statsAdapter.tracker = selectionTracker
-        selectionTracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
+
+        selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
+                if (selectedItems.size == 1 && actionMode == null) {
+                    actionMode = requireActivity().startActionMode(actionModeCallback)
+                }
 
             }
-        })
 
-        val actionModeCallback = object: ActionMode.Callback {
-            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                val inflater = mode.menuInflater
-                inflater.inflate(R.menu.action_mode_menu, menu)
-                return true
-            }
-
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                return false
-            }
-
-            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                return when (item.itemId) {
-                    R.id.action_mode_delete -> {
-                        // deleteCurrentItem
-                        mode.finish()
-                        true
+            override fun onItemStateChanged(key: Long, selected: Boolean) {
+                if (selected) {
+                    if (key !in selectedItems) {
+                        selectedItems.add(key)
                     }
-                    else -> false
+                } else {
+                    if (key in selectedItems) {
+                        selectedItems.remove(key)
+                    }
+                }
+                if (selectedItems.isEmpty()) {
+                    actionMode?.finish()
                 }
             }
-
-            override fun onDestroyActionMode(mode: ActionMode?) {
-                actionMode = null
-            }
-
-        }
+        })
+        statsAdapter.tracker = selectionTracker
     }
 
     private fun initTextViews() {
@@ -178,20 +208,30 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         val currentDateAndTime = DateAndTime.fromCalendar(calendar)
         val sevenDaysAgo = currentDateAndTime.day - 7
 
-        mainViewModel.setStartingDate(sevenDaysAgo,currentDateAndTime.month,currentDateAndTime.year)
-        mainViewModel.setEndingDate(currentDateAndTime.day,currentDateAndTime.month,currentDateAndTime.year)
+        mainViewModel.setStartingDate(
+            sevenDaysAgo,
+            currentDateAndTime.month,
+            currentDateAndTime.year
+        )
+        mainViewModel.setEndingDate(
+            currentDateAndTime.day,
+            currentDateAndTime.month,
+            currentDateAndTime.year
+        )
 
         startingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(startingDate.text.toString())
-            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
+            DatePickerDialogFragment(
+                this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
                 STARTING_DATE_PICKER
             ).show(parentFragmentManager, DATE_PICKER)
         }
         endingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(endingDate.text.toString())
-            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
+            DatePickerDialogFragment(
+                this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
                 ENDING_DATE_PICKER
-            ).show(parentFragmentManager,DATE_PICKER)
+            ).show(parentFragmentManager, DATE_PICKER)
         }
     }
 
@@ -242,16 +282,16 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         }
 
         resultList.forEachIndexed { index, stat ->
-            val entry = Entry(index.toFloat(),stat.waist.toFloat())
+            val entry = Entry(index.toFloat(), stat.waist.toFloat())
             entries.add(entry)
         }
         val xAxisDescriptiveValues = resultList.map { stat ->
             stat.date.substringBeforeLast(".")
         }
-        val valueFormatter = object: ValueFormatter() {
+        val valueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                if(value < 0f || value.toInt() >= xAxisDescriptiveValues.size) {
-                    if(xAxisDescriptiveValues.size == 1) return ""
+                if (value < 0f || value.toInt() >= xAxisDescriptiveValues.size) {
+                    if (xAxisDescriptiveValues.size == 1) return ""
                     return super.getAxisLabel(value, axis)
                 }
                 return xAxisDescriptiveValues[value.toInt()]
@@ -262,7 +302,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         xAxis.granularity = 1f
         xAxis.valueFormatter = valueFormatter
 
-        val lineDataSet = LineDataSet(entries,"Waist")
+        val lineDataSet = LineDataSet(entries, "Waist")
         val dataSet = mutableListOf<ILineDataSet>()
         dataSet.add(lineDataSet)
         graph.data = LineData(dataSet)
@@ -291,8 +331,12 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         })
 
         mainViewModel.dateInputError.observe(viewLifecycleOwner, { errorEvent ->
-            if(!errorEvent.hasBeenHandled) {
-                Snackbar.make(requireView(),errorEvent.getContentIfNotHandled().toString(),Snackbar.LENGTH_SHORT).show()
+            if (!errorEvent.hasBeenHandled) {
+                Snackbar.make(
+                    requireView(),
+                    errorEvent.getContentIfNotHandled().toString(),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -303,19 +347,19 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-            view?.let {
-                when(view.tag) {
-                    STARTING_DATE_PICKER -> {
-                        mainViewModel.setStartingDate(dayOfMonth,month+1,year)
-                    }
-                    ENDING_DATE_PICKER -> {
-                        mainViewModel.setEndingDate(dayOfMonth,month+1, year)
-                    }
-                    ADD_STAT_DATE_PICKER -> {
-                        // invalid
-                    }
+        view?.let {
+            when (view.tag) {
+                STARTING_DATE_PICKER -> {
+                    mainViewModel.setStartingDate(dayOfMonth, month + 1, year)
+                }
+                ENDING_DATE_PICKER -> {
+                    mainViewModel.setEndingDate(dayOfMonth, month + 1, year)
+                }
+                ADD_STAT_DATE_PICKER -> {
+                    // invalid
                 }
             }
+        }
     }
 
     companion object {
