@@ -29,17 +29,17 @@ import com.hooni.diettracker.databinding.FragmentStatsBinding
 import com.hooni.diettracker.ui.adapter.StatsAdapter
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
-import com.hooni.diettracker.util.ADD_STAT_DATE_PICKER
-import com.hooni.diettracker.util.DateAndTime
-import com.hooni.diettracker.util.ENDING_DATE_PICKER
-import com.hooni.diettracker.util.STARTING_DATE_PICKER
+import com.hooni.diettracker.util.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
+
+// TODO: recyclerview liste anhand von datum sortieren
 
 class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
     private lateinit var binding: FragmentStatsBinding
-    private val mainViewModel: MainViewModel by viewModel()
+    private val mainViewModel: MainViewModel by sharedViewModel()
 
     private lateinit var graph: LineChart
 
@@ -81,7 +81,23 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     private fun initRecyclerView() {
-        statsAdapter = StatsAdapter(stats)
+        val editClickListener: (Stat) -> Unit = { stat ->
+            val weight = stat.weight
+            val waist = stat.waist
+            val kCal = stat.kCal
+            val dateAndTime = DateAndTime.fromString(stat.date,stat.time)
+
+            mainViewModel.setDateAndTime(dateAndTime)
+            mainViewModel.weight.value = weight.toString()
+            mainViewModel.waist.value = waist.toString()
+            mainViewModel.kCal.value = kCal.toString()
+            mainViewModel.editStatId = stat.id
+
+            addStatFragment = AddStatFragment()
+            addStatFragment.show(requireActivity().supportFragmentManager, ADD_STAT_FRAGMENT_EDITING)
+        }
+        statsAdapter = StatsAdapter(stats, editClickListener)
+
         layoutManager = LinearLayoutManager(requireContext())
         recyclerView = binding.recyclerViewStatsData
         recyclerView.layoutManager = layoutManager
@@ -115,15 +131,15 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
         startingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(startingDate.text.toString())
-            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month-1, setDateAndTime.year,
+            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
                 STARTING_DATE_PICKER
-            ).show(parentFragmentManager,"datePicker")
+            ).show(parentFragmentManager, DATE_PICKER)
         }
         endingDate.setOnClickListener {
             val setDateAndTime = DateAndTime.fromString(endingDate.text.toString())
-            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month-1, setDateAndTime.year,
+            DatePickerDialogFragment(this, setDateAndTime.day, setDateAndTime.month, setDateAndTime.year,
                 ENDING_DATE_PICKER
-            ).show(parentFragmentManager,"datePicker")
+            ).show(parentFragmentManager,DATE_PICKER)
         }
     }
 
@@ -134,7 +150,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
     private val addStatOnClickListener = View.OnClickListener {
         addStatFragment = AddStatFragment()
-        addStatFragment.show(requireActivity().supportFragmentManager, "addStatFragment")
+        addStatFragment.show(requireActivity().supportFragmentManager, ADD_STAT_FRAGMENT_ADDING)
     }
 
     private fun initGraph() {
@@ -204,6 +220,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         mainViewModel.stats.observe(viewLifecycleOwner, { statList ->
             stats.clear()
             stats.addAll(statList)
+            stats.sortBy { it.date }
             statsAdapter.notifyDataSetChanged()
             updateDateFilter()
             updateGraphData()
@@ -237,10 +254,10 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             view?.let {
                 when(view.tag) {
                     STARTING_DATE_PICKER -> {
-                        mainViewModel.setStartingDate(dayOfMonth,month,year)
+                        mainViewModel.setStartingDate(dayOfMonth,month+1,year)
                     }
                     ENDING_DATE_PICKER -> {
-                        mainViewModel.setEndingDate(dayOfMonth,month, year)
+                        mainViewModel.setEndingDate(dayOfMonth,month+1, year)
                     }
                     ADD_STAT_DATE_PICKER -> {
                         // invalid

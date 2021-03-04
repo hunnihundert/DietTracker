@@ -18,8 +18,6 @@ class StatsViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         val waist = view.findViewById<TextView>(R.id.textView_listItemStats_waist)
         val kCal = view.findViewById<TextView>(R.id.textView_listItemStats_kCal)
 
-
-
         date.text = stat.date
         time.text = stat.time
         weight.text = view.context.getString(R.string.textView_listItem_weight, stat.weight.toString())

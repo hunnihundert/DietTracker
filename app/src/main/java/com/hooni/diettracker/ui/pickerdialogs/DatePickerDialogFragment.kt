@@ -16,7 +16,7 @@ class DatePickerDialogFragment(
 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val picker = DatePickerDialog(requireContext(), datePickerListener, year, month, day)
+        val picker = DatePickerDialog(requireContext(), datePickerListener, year, month-1, day)
         picker.datePicker.tag = pickerTag
         return picker
     }

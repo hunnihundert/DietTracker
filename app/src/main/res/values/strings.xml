@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Diet Tracker</string>
-    <string name="textView_input_title">Enter Infos</string>
+    <string name="textView_input_titleAddStat">Enter Infos</string>
+    <string name="textView_input_titleEditStat">Edit Infos</string>
     <string name="textInputLayout_input_weight_hint">Enter Weight</string>
     <string name="textInputLayout_input_waist_hint">Enter Waist</string>
     <string name="textView_input_weight_title">Weight</string>

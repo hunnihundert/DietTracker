@@ -17,7 +17,7 @@
             android:id="@+id/textView_input_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/textView_input_title"
+            android:text="@string/textView_input_titleAddStat"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -137,14 +137,14 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="4"
-                android:text="@={viewModel.date}" />
+                android:text="@{viewModel.date}" />
 
             <TextView
                 android:id="@+id/textView_input_time"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="4"
-                android:text="@={viewModel.time}" />
+                android:text="@{viewModel.time}" />
 
         </LinearLayout>
 

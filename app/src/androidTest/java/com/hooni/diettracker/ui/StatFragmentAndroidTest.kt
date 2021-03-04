@@ -12,12 +12,14 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.PickerActions
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.hooni.diettracker.R
 import com.hooni.diettracker.di.androidTestRepositoryModule
 import com.hooni.diettracker.di.androidTestViewModelModule
+import com.hooni.diettracker.ui.adapter.StatsViewHolder
 import com.hooni.diettracker.util.DateAndTime
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Description
@@ -213,6 +215,29 @@ class StatFragmentAndroidTest : KoinTest {
                 )
             )
         )
+    }
+
+
+
+    @Test
+    fun whenTappingAnEntryInTheRecyclerView_thenAnEditPopUpAppearsWithTheCurrentStatsOfTheEntryEntered() {
+        onView(withId(R.id.recyclerView_stats_data)).perform(RecyclerViewActions.actionOnItemAtPosition<StatsViewHolder>(0, click()))
+        onView(withId(R.id.textView_input_title)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun whenTappingAndEntryChangingTheStatsAndConfirming_thenTheSelectedEntryStatsAreChanged() {
+
+    }
+
+    @Test
+    fun whenTappingAndHoldingAnEntry_ThenTheActionMenuOpens() {
+
+    }
+
+    @Test
+    fun whenTappingHoldingAnEntryAndTappingTheDeleteIcon_thenTheEntryIsDeletedFromTheRecyclerView() {
+
     }
 
     private fun hasItem(matcher: Matcher<View?>): Matcher<View?> {

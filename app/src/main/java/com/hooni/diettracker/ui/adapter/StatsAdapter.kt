@@ -1,6 +1,7 @@
 package com.hooni.diettracker.ui.adapter
 
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
@@ -8,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.util.DateAndTime
 
-class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
+class StatsAdapter(private val stats: MutableList<Stat>, private val editClickListener: (Stat) -> Unit): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
 
     var displayedStats = mutableListOf<Stat>()
 
@@ -21,7 +22,9 @@ class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<S
     }
 
     override fun onBindViewHolder(holder: StatsViewHolder, position: Int) {
-        holder.bind(displayedStats[position])
+        val item = displayedStats[position]
+        holder.itemView.setOnClickListener {editClickListener(item)}
+        holder.bind(item)
     }
 
     override fun getItemCount(): Int {
