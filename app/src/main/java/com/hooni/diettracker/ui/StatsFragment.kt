@@ -3,13 +3,16 @@ package com.hooni.diettracker.ui
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.DatePicker
 import android.widget.TextView
+import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.selection.SelectionPredicates
+import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.selection.StableIdKeyProvider
+import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.LineChart
@@ -27,6 +30,7 @@ import com.hooni.diettracker.R
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.databinding.FragmentStatsBinding
 import com.hooni.diettracker.ui.adapter.StatsAdapter
+import com.hooni.diettracker.ui.adapter.StatsItemDetailsLookup
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.*
@@ -54,6 +58,9 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private lateinit var addStats: FloatingActionButton
 
     private lateinit var addStatFragment: DialogFragment
+
+    private lateinit var selectionTracker: SelectionTracker<Long>
+    private var actionMode: ActionMode? = null
 
     private val stats = mutableListOf<Stat>()
 
@@ -102,6 +109,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         recyclerView = binding.recyclerViewStatsData
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = statsAdapter
+
         statsAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() {
                 super.onChanged()
@@ -114,6 +122,50 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
                 }
             }
         })
+
+        selectionTracker = SelectionTracker.Builder(
+            "selectionId",
+            recyclerView,
+            StableIdKeyProvider(recyclerView),
+            StatsItemDetailsLookup(recyclerView),
+            StorageStrategy.createLongStorage()
+        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build()
+
+        statsAdapter.tracker = selectionTracker
+        selectionTracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
+            override fun onSelectionChanged() {
+                super.onSelectionChanged()
+
+            }
+        })
+
+        val actionModeCallback = object: ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                val inflater = mode.menuInflater
+                inflater.inflate(R.menu.action_mode_menu, menu)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                return false
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                return when (item.itemId) {
+                    R.id.action_mode_delete -> {
+                        // deleteCurrentItem
+                        mode.finish()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode?) {
+                actionMode = null
+            }
+
+        }
     }
 
     private fun initTextViews() {

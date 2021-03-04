@@ -26,4 +26,5 @@
     <string name="errorMessage_stats_invalidDate">Invalid Date Selection</string>
     <string name="noDataGraphDescription_stats_emptyGraph">No data. Add some entries!</string>
     <string name="button_input_cancel">Cancel</string>
+    <string name="actionModeMenu_delete">Delete</string>
 </resources>
