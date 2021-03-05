@@ -63,17 +63,14 @@ class StatDaoTest : KoinTest {
         var statList = dao.getAllStats().first()
         assertThat(statList).contains(mockStat1)
 
-        dao.deleteStat(mockStat1)
-        statList = dao.getAllStats().first()
-        assertThat(statList).doesNotContain(mockStat1)
-        assertThat(statList).containsExactly(mockStat2,mockStat3)
+        val deletionList1 = listOf(mockStat1.id,mockStat3.id)
+        val deletionList2 = listOf(mockStat2.id)
 
-        dao.deleteStat(mockStat2)
+        dao.deleteStats(deletionList1)
         statList = dao.getAllStats().first()
-        assertThat(statList).doesNotContain(mockStat2)
-        assertThat(statList).containsExactly(mockStat3)
+        assertThat(statList).containsExactly(mockStat2)
 
-        dao.deleteStat(mockStat3)
+        dao.deleteStats(deletionList2)
         statList = dao.getAllStats().first()
         assertThat(statList).isEmpty()
     }

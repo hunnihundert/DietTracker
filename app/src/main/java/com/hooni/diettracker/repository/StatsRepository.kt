@@ -14,8 +14,8 @@ class StatsRepository(private val statsDao: StatsDao): Repository {
         statsDao.insertStat(stat)
     }
 
-    override suspend fun deleteStat(stat: Stat) {
-        statsDao.deleteStat(stat)
+    override suspend fun deleteStats(idList: List<Int>) {
+        statsDao.deleteStats(idList)
     }
 
     override suspend fun updateStat(stat: Stat) {

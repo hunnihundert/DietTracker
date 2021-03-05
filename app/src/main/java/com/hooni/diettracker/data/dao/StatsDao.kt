@@ -13,8 +13,8 @@ interface StatsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStat(stat: Stat)
 
-    @Delete
-    suspend fun deleteStat(stat: Stat)
+    @Query("DELETE FROM stat WHERE id IN (:idList)")
+    suspend fun deleteStats(idList: List<Int>)
 
     @Update
     suspend fun updateStat(stat: Stat)

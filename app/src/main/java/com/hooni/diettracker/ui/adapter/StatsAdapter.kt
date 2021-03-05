@@ -1,19 +1,20 @@
 package com.hooni.diettracker.ui.adapter
 
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.RecyclerView
 import com.hooni.diettracker.data.Stat
 import com.hooni.diettracker.util.DateAndTime
 
-class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
-
+class StatsAdapter(private val stats: MutableList<Stat>, private val editClickListener: (Stat) -> Unit): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
+    var tracker: SelectionTracker<Long>? = null
     var displayedStats = mutableListOf<Stat>()
 
     init {
         displayedStats = stats
+        setHasStableIds(true)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatsViewHolder {
@@ -21,7 +22,12 @@ class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<S
     }
 
     override fun onBindViewHolder(holder: StatsViewHolder, position: Int) {
-        holder.bind(displayedStats[position])
+        val item = displayedStats[position]
+        holder.itemView.setOnClickListener {editClickListener(item)}
+        tracker?.let {
+            holder.bind(item, it.isSelected(position.toLong()))
+        }
+
     }
 
     override fun getItemCount(): Int {
@@ -52,6 +58,8 @@ class StatsAdapter(private val stats: MutableList<Stat>): RecyclerView.Adapter<S
             }
         }
     }
+
+    override fun getItemId(position: Int): Long = position.toLong()
 
     companion object {
         private const val TAG = "StatsAdapter"

@@ -3,6 +3,7 @@ package com.hooni.diettracker.ui
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,19 +20,16 @@ import com.hooni.diettracker.databinding.FragmentInputBinding
 import com.hooni.diettracker.ui.pickerdialogs.DatePickerDialogFragment
 import com.hooni.diettracker.ui.pickerdialogs.TimePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
-import com.hooni.diettracker.util.ADD_STAT_DATE_PICKER
-import com.hooni.diettracker.util.DateAndTime
-import com.hooni.diettracker.util.Status
-import org.koin.android.ext.android.bind
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
+import com.hooni.diettracker.util.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     DatePickerDialog.OnDateSetListener {
 
     private lateinit var binding: FragmentInputBinding
-    private val mainViewModel: MainViewModel by viewModel()
+    private val mainViewModel: MainViewModel by sharedViewModel()
 
+    private lateinit var title: TextView
     private lateinit var date: TextView
     private lateinit var time: TextView
 
@@ -66,7 +64,14 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         initObserver()
     }
 
+    override fun onStop() {
+        super.onStop()
+        mainViewModel.clearStats()
+    }
+
     private fun initUi() {
+        Log.d(TAG, "initUi: ${mainViewModel.getDateAndTime()}")
+        title = binding.textViewInputTitle
         date = binding.textViewInputDate
         time = binding.textViewInputTime
         confirm = binding.buttonInputConfirm
@@ -76,10 +81,17 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         waistTextInputLayout = binding.textInputLayoutInputWaist
         kCalTextInputLayout = binding.textInputLayoutInputKcal
 
-        val calendar = Calendar.getInstance()
-        val currentDateAndTime = DateAndTime.fromCalendar(calendar)
+        if (tag == ADD_STAT_FRAGMENT_ADDING) {
+            title.text = getString(R.string.textView_input_titleAddStat)
+        } else {
+            title.text = getString(R.string.textView_input_titleEditStat)
+        }
 
-        mainViewModel.setDateAndTime(currentDateAndTime)
+        val currentDateAndTime = mainViewModel.getDateAndTime()
+
+        Log.d(TAG, "initUi: $currentDateAndTime")
+        Log.d(TAG, "initUi: ${mainViewModel.date.value}")
+        Log.d(TAG, "initUi: ${mainViewModel.time.value}")
 
         date.setOnClickListener {
             DatePickerDialogFragment(
@@ -90,13 +102,13 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
                 ADD_STAT_DATE_PICKER
             ).show(
                 requireActivity().supportFragmentManager,
-                "datePicker"
+                DATE_PICKER
             )
         }
         time.setOnClickListener {
             TimePickerDialogFragment(
                 this, currentDateAndTime.hour, currentDateAndTime.minute
-            ).show(requireActivity().supportFragmentManager, "timePicker")
+            ).show(requireActivity().supportFragmentManager, TIME_PICKER)
         }
 
         confirm.setOnClickListener {
@@ -105,7 +117,8 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
         }
 
         cancel.setOnClickListener {
-            dismiss()git
+            //mainViewModel.clearStats()
+            dismiss()
         }
     }
 
@@ -120,7 +133,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        mainViewModel.setDate(dayOfMonth, month, year)
+        mainViewModel.setDate(dayOfMonth, month+1, year)
     }
 
     private fun initObserver() {
@@ -129,7 +142,7 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
                 when (resource.status) {
                     Status.ERROR -> {
                         resource.message?.let { message ->
-                            view?.let {dialogView ->
+                            view?.let { dialogView ->
                                 Snackbar.make(
                                     dialogView,
                                     message,
@@ -150,15 +163,14 @@ class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     }
 
 
-
     private fun showErrorOnEmptyTextInputField() {
-        if(weightTextInputLayout.editText?.text.isNullOrBlank()) {
+        if (weightTextInputLayout.editText?.text.isNullOrBlank()) {
             weightTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
         }
-        if(waistTextInputLayout.editText?.text.isNullOrBlank()) {
+        if (waistTextInputLayout.editText?.text.isNullOrBlank()) {
             waistTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
         }
-        if(kCalTextInputLayout.editText?.text.isNullOrBlank()) {
+        if (kCalTextInputLayout.editText?.text.isNullOrBlank()) {
             kCalTextInputLayout.error = getString(R.string.textInputLayoutError_input_emptyField)
         }
     }

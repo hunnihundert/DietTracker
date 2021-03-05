@@ -24,6 +24,28 @@ data class DateAndTime(
         return 0
     }
 
+    fun getDateString(): String {
+        return "$day.$month.$year"
+    }
+
+    fun getTimeString(): String {
+        return "$hour:$minute"
+    }
+
+    /**
+     * Creates a new DateAndTime object with the changed value. If a value is left empty it will
+     * adopt the value from the current DateAndTime object
+     *
+     * @param changedDay optional
+     * @param changedMonth optional
+     * @param changedYear optional
+     * @param changedHour optional
+     * @param changedMinute optional
+     */
+    fun changeElement(changedDay: Int = this.day, changedMonth: Int = this.month, changedYear: Int = this.year, changedHour: Int = this.hour, changedMinute: Int = this.minute): DateAndTime {
+        return DateAndTime(changedDay,changedMonth,changedYear,changedHour,changedMinute)
+    }
+
     companion object {
         fun fromCalendar(calendar: Calendar): DateAndTime {
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -33,7 +55,7 @@ data class DateAndTime(
             val currentYear = calendar.get(Calendar.YEAR)
             return DateAndTime(
                 currentDayOfTheMonth,
-                currentMonth,
+                currentMonth+1,
                 currentYear,
                 currentHour,
                 currentMinute

@@ -9,6 +9,7 @@ import com.hooni.diettracker.util.DateAndTime
 import com.hooni.diettracker.util.Event
 import com.hooni.diettracker.util.Resource
 import kotlinx.coroutines.launch
+import java.util.*
 
 class MainViewModel(private val repository: Repository, application: Application) :
     AndroidViewModel(application) {
@@ -21,11 +22,28 @@ class MainViewModel(private val repository: Repository, application: Application
     internal val insertStatStatus: LiveData<Event<Resource<Stat>>>
         get() = _insertStatStatus
 
+    internal var editStatId: Int? = null
+
     val weight = MutableLiveData<String>()
     val waist = MutableLiveData<String>()
     val kCal = MutableLiveData<String>()
-    val date = MutableLiveData<String>()
-    val time = MutableLiveData<String>()
+
+    private val dateTime = MutableLiveData<DateAndTime?>()
+    val date = dateTime.switchMap {
+        if(it == null) {
+            MutableLiveData("")
+        } else {
+            MutableLiveData(it.getDateString())
+        }
+
+    }
+    val time = dateTime.switchMap {
+        if(it == null) {
+            MutableLiveData("")
+        } else {
+            MutableLiveData(it.getTimeString())
+        }
+    }
 
     private val _startingDate = MutableLiveData<String>()
     internal val startingDate: LiveData<String>
@@ -38,6 +56,9 @@ class MainViewModel(private val repository: Repository, application: Application
     private val _dateInputError = MutableLiveData<Event<String>>()
     internal val dateInputError: LiveData<Event<String>>
         get() = _dateInputError
+
+    private val deletionList = mutableListOf<Stat>()
+
     /**
      * Calls insertStat in repository via coroutine in viewModelScope.
      *
@@ -49,9 +70,13 @@ class MainViewModel(private val repository: Repository, application: Application
         }
     }
 
-    internal fun deleteStat(stat: Stat) {
+    private fun deleteStat(stats: List<Stat>) {
+        val deletionIdList = stats.map { stat ->
+            stat.id
+        }
         viewModelScope.launch {
-            repository.deleteStat(stat)
+            repository.deleteStats(deletionIdList)
+            deletionList.clear()
         }
     }
 
@@ -80,8 +105,16 @@ class MainViewModel(private val repository: Repository, application: Application
             _insertStatStatus.value =
                 Event(Resource.error(R.string.errorMessage_viewModel_invalidInput, null))
         } else {
-            val newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), date, time)
-            insertStatIntoDatabase(newStat)
+
+            val newStat: Stat
+            if(editStatId == null) {
+                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), date, time)
+                insertStatIntoDatabase(newStat)
+            } else {
+                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), date, time, editStatId!!)
+                updateStat(newStat)
+                editStatId = null
+            }
             _insertStatStatus.value = Event(Resource.success(newStat))
         }
     }
@@ -90,7 +123,9 @@ class MainViewModel(private val repository: Repository, application: Application
      * Calls [insertStat] with the stats that are currently in the corresponding live data.
      */
     internal fun insertStat() {
-        insertStat(weight.value ?: "", waist.value ?: "", kCal.value ?: "", date.value ?: "", time.value ?: "")
+        val date = dateTime.value?.getDateString() ?: ""
+        val time = dateTime.value?.getTimeString() ?: ""
+        insertStat(weight.value ?: "", waist.value ?: "", kCal.value ?: "", date, time)
     }
 
     /**
@@ -100,11 +135,7 @@ class MainViewModel(private val repository: Repository, application: Application
      * @param minute minute
      */
     internal fun setTime(hourOfDay: Int, minute: Int) {
-        time.value = getApplication<Application>().resources.getString(
-            R.string.formatted_time,
-            hourOfDay,
-            minute
-        )
+        dateTime.value = dateTime.value!!.changeElement(changedHour = hourOfDay, changedMinute = minute)
     }
 
     /**
@@ -115,40 +146,35 @@ class MainViewModel(private val repository: Repository, application: Application
      * @param year year
      */
     internal fun setDate(dayOfMonth: Int, month: Int, year: Int) {
-        date.value = getApplication<Application>().resources.getString(
-            R.string.formatted_date,
-            dayOfMonth,
-            month,
-            year
-        )
+        dateTime.value = dateTime.value!!.changeElement(dayOfMonth,month,year)
     }
 
     /**
      * Sets the date and time value in the viewModel.
-     * The info in the viewModel for both is a string and formatted as dd.mm.yy for date and hh:mm in 24hr format for time.
      *
      * @param dateAndTime Date and Time to set the info in the viewModel to.
      */
     internal fun setDateAndTime(dateAndTime: DateAndTime) {
-        date.value = getApplication<Application>().resources.getString(
-            R.string.formatted_date,
-            dateAndTime.day,
-            dateAndTime.month+1,
-            dateAndTime.year
-        )
-        time.value = getApplication<Application>().resources.getString(
-            R.string.formatted_time,
-            dateAndTime.hour,
-            dateAndTime.minute
-        )
+        dateTime.value = dateAndTime
+    }
+
+    /**
+     * Gets the date and time from the viewModel.
+     * If not instantiated it gets a DateAndTime object based on the current date and time
+     */
+    internal fun getDateAndTime(): DateAndTime {
+        if(dateTime.value == null) {
+            dateTime.value = DateAndTime.fromCalendar(Calendar.getInstance())
+        }
+        
+        return dateTime.value!!
     }
 
     internal fun setStartingDate(day: Int, month: Int, year: Int) {
-        val newStartingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month+1,year)
+        val newStartingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month,year)
         val newStarting = DateAndTime.fromString(newStartingDate)
-        val ending = DateAndTime.fromString(_endingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day+1,month+1,year))
+        val ending = DateAndTime.fromString(_endingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day+1,month,year))
         if(newStarting > ending) {
-            //_startingDate.value = _endingDate.value
             _dateInputError.value = Event(getApplication<Application>().resources.getString(R.string.errorMessage_stats_invalidDate))
         } else {
             _startingDate.value = newStartingDate
@@ -156,15 +182,40 @@ class MainViewModel(private val repository: Repository, application: Application
     }
 
     internal fun setEndingDate(day: Int, month: Int, year: Int) {
-        val newEndingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month+1,year)
+        val newEndingDate = getApplication<Application>().resources.getString(R.string.formatted_date,day,month,year)
         val newEnding = DateAndTime.fromString(newEndingDate)
-        val starting = DateAndTime.fromString(_startingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day-1,month+1,year))
+        val starting = DateAndTime.fromString(_startingDate.value ?: getApplication<Application>().resources.getString(R.string.formatted_date,day-1,month,year))
         if(newEnding < starting) {
-            //_endingDate.value = _startingDate.value
             _dateInputError.value = Event(getApplication<Application>().resources.getString(R.string.errorMessage_stats_invalidDate))
         } else {
             _endingDate.value = newEndingDate
         }
+    }
+
+    /**
+     * Clears weight, waist, kCal, date, time in the viewModel.
+     */
+    internal fun clearStats() {
+        weight.value = ""
+        waist.value = ""
+        kCal.value = ""
+        dateTime.value = null
+    }
+
+    internal fun addOrRemoveFromDeletionList(stat: Stat, isSelected: Boolean) {
+        if(isSelected) {
+            deletionList.add(stat)
+        } else {
+            deletionList.remove(stat)
+        }
+    }
+
+    internal fun getSelectedItemSize(): Int {
+        return deletionList.size
+    }
+
+    internal fun deleteSelectedItems() {
+        deleteStat(deletionList)
     }
 
     companion object {

@@ -21,8 +21,10 @@ class FakeStatsRepository: Repository {
         fakeStats.add(newStat)
     }
 
-    override suspend fun deleteStat(stat: Stat) {
-        fakeStats.remove(stat)
+    override suspend fun deleteStats(idList: List<Int>) {
+        fakeStats.removeIf { stat ->
+            idList.contains(stat.id)
+        }
     }
 
     override suspend fun updateStat(stat: Stat) {
