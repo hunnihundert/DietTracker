@@ -1,7 +1,6 @@
 package com.hooni.diettracker.ui
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.widget.DatePicker
 import androidx.fragment.app.testing.FragmentScenario

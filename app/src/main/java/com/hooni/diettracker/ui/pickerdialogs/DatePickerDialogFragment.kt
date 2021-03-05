@@ -3,7 +3,6 @@ package com.hooni.diettracker.ui.pickerdialogs
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.DialogFragment
 
 class DatePickerDialogFragment(

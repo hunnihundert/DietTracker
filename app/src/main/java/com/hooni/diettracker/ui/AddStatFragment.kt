@@ -22,8 +22,6 @@ import com.hooni.diettracker.ui.pickerdialogs.TimePickerDialogFragment
 import com.hooni.diettracker.ui.viewmodel.MainViewModel
 import com.hooni.diettracker.util.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
 
 class AddStatFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener,
     DatePickerDialog.OnDateSetListener {

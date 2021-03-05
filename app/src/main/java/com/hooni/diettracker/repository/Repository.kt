@@ -9,7 +9,7 @@ interface Repository {
 
     suspend fun insertStat(stat: Stat)
 
-    suspend fun deleteStat(stat: Stat)
+    suspend fun deleteStats(idList: List<Int>)
 
     suspend fun updateStat(stat: Stat)
 }

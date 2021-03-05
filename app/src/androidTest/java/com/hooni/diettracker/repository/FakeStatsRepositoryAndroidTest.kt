@@ -29,8 +29,10 @@ class FakeStatsRepositoryAndroidTest: Repository {
 
     }
 
-    override suspend fun deleteStat(stat: Stat) {
-        underlyingList.remove(stat)
+    override suspend fun deleteStats(idList: List<Int>) {
+        underlyingList.removeIf { stat ->
+            idList.contains(stat.id)
+        }
     }
 
     override suspend fun updateStat(stat: Stat) {

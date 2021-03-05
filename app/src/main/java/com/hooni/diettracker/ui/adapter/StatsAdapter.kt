@@ -1,11 +1,8 @@
 package com.hooni.diettracker.ui.adapter
 
-import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.RecyclerView
 import com.hooni.diettracker.data.Stat

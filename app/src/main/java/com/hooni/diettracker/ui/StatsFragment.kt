@@ -2,7 +2,6 @@ package com.hooni.diettracker.ui
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.DatePicker
 import android.widget.TextView
@@ -61,8 +60,6 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private var actionMode: ActionMode? = null
     private lateinit var actionModeCallback: ActionMode.Callback
 
-    private val selectedItems = mutableListOf<Long>()
-
     private val stats = mutableListOf<Stat>()
 
     override fun onCreateView(
@@ -105,7 +102,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
                 return when (item.itemId) {
                     R.id.action_mode_delete -> {
-                        // deleteCurrentItem
+                        mainViewModel.deleteSelectedItems()
                         selectionTracker.clearSelection()
                         mode.finish()
                         true
@@ -174,23 +171,16 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
-                if (selectedItems.size == 1 && actionMode == null) {
+                if (mainViewModel.getSelectedItemSize() == 1 && actionMode == null) {
                     actionMode = requireActivity().startActionMode(actionModeCallback)
                 }
 
             }
 
             override fun onItemStateChanged(key: Long, selected: Boolean) {
-                if (selected) {
-                    if (key !in selectedItems) {
-                        selectedItems.add(key)
-                    }
-                } else {
-                    if (key in selectedItems) {
-                        selectedItems.remove(key)
-                    }
-                }
-                if (selectedItems.isEmpty()) {
+                val selectedStat = statsAdapter.displayedStats[key.toInt()]
+                mainViewModel.addOrRemoveFromDeletionList(selectedStat, selected)
+                if (mainViewModel.getSelectedItemSize() == 0) {
                     actionMode?.finish()
                 }
             }

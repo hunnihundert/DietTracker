@@ -1,7 +1,6 @@
 package com.hooni.diettracker.ui.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.*
 import com.hooni.diettracker.R
 import com.hooni.diettracker.data.Stat
@@ -34,7 +33,7 @@ class MainViewModel(private val repository: Repository, application: Application
         if(it == null) {
             MutableLiveData("")
         } else {
-            MutableLiveData(it!!.getDateString())
+            MutableLiveData(it.getDateString())
         }
 
     }
@@ -42,7 +41,7 @@ class MainViewModel(private val repository: Repository, application: Application
         if(it == null) {
             MutableLiveData("")
         } else {
-            MutableLiveData(it!!.getTimeString())
+            MutableLiveData(it.getTimeString())
         }
     }
 
@@ -57,6 +56,9 @@ class MainViewModel(private val repository: Repository, application: Application
     private val _dateInputError = MutableLiveData<Event<String>>()
     internal val dateInputError: LiveData<Event<String>>
         get() = _dateInputError
+
+    private val deletionList = mutableListOf<Stat>()
+
     /**
      * Calls insertStat in repository via coroutine in viewModelScope.
      *
@@ -68,9 +70,13 @@ class MainViewModel(private val repository: Repository, application: Application
         }
     }
 
-    internal fun deleteStat(stat: Stat) {
+    private fun deleteStat(stats: List<Stat>) {
+        val deletionIdList = stats.map { stat ->
+            stat.id
+        }
         viewModelScope.launch {
-            repository.deleteStat(stat)
+            repository.deleteStats(deletionIdList)
+            deletionList.clear()
         }
     }
 
@@ -90,7 +96,7 @@ class MainViewModel(private val repository: Repository, application: Application
      * @param date Date of the stat. Currently, dd.mm.yy
      * @param time Time of the stat. 24hr format
      */
-    private fun insertStat(weight: String, waist: String, kCal: String, date: String, time: String) {
+    internal fun insertStat(weight: String, waist: String, kCal: String, date: String, time: String) {
         if (weight.isEmpty() || waist.isEmpty() || kCal.isEmpty() || date.isEmpty() || time.isEmpty()) {
             _insertStatStatus.value =
                 Event(Resource.error(R.string.errorMessage_viewModel_emptyField, null))
@@ -149,9 +155,7 @@ class MainViewModel(private val repository: Repository, application: Application
      * @param dateAndTime Date and Time to set the info in the viewModel to.
      */
     internal fun setDateAndTime(dateAndTime: DateAndTime) {
-        Log.d(TAG, "setDateAndTime: $dateAndTime")
         dateTime.value = dateAndTime
-        Log.d(TAG, "setDateAndTime: ${dateTime.value}")
     }
 
     /**
@@ -159,7 +163,6 @@ class MainViewModel(private val repository: Repository, application: Application
      * If not instantiated it gets a DateAndTime object based on the current date and time
      */
     internal fun getDateAndTime(): DateAndTime {
-        Log.d(TAG, "getDateAndTime: ${dateTime.value}")
         if(dateTime.value == null) {
             dateTime.value = DateAndTime.fromCalendar(Calendar.getInstance())
         }
@@ -197,6 +200,22 @@ class MainViewModel(private val repository: Repository, application: Application
         waist.value = ""
         kCal.value = ""
         dateTime.value = null
+    }
+
+    internal fun addOrRemoveFromDeletionList(stat: Stat, isSelected: Boolean) {
+        if(isSelected) {
+            deletionList.add(stat)
+        } else {
+            deletionList.remove(stat)
+        }
+    }
+
+    internal fun getSelectedItemSize(): Int {
+        return deletionList.size
+    }
+
+    internal fun deleteSelectedItems() {
+        deleteStat(deletionList)
     }
 
     companion object {
