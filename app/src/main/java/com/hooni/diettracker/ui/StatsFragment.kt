@@ -196,12 +196,13 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         val calendar = Calendar.getInstance()
 
         val currentDateAndTime = DateAndTime.fromCalendar(calendar)
-        val sevenDaysAgo = currentDateAndTime.day - 7
+        val sevenDaysAgo = DateAndTime.fromDateAndTime(currentDateAndTime)
+        sevenDaysAgo.reduceBy(7, DateAndTime.Units.DAY)
 
         mainViewModel.setStartingDate(
-            sevenDaysAgo,
-            currentDateAndTime.month,
-            currentDateAndTime.year
+            sevenDaysAgo.day,
+            sevenDaysAgo.month,
+            sevenDaysAgo.year
         )
         mainViewModel.setEndingDate(
             currentDateAndTime.day,
