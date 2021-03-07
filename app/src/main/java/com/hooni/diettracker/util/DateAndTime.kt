@@ -123,29 +123,35 @@ data class DateAndTime(
                         daysToSubtract = (amount - hoursToSubtract) / 24
 
                     } else {
-                        hoursToSubtract = amount - this.hour
-                        daysToSubtract = 1
-                        this.hour = 0
+                        hoursToSubtract = amount
+                    }
+                    if (hoursToSubtract >= this.hour) {
+                        daysToSubtract++
+                        hoursToSubtract -= this.hour
+                        this.hour = 24
                     }
                     this.reduceBy(daysToSubtract, Units.DAY)
                     this.reduceBy(hoursToSubtract, Units.HOUR)
                 }
             }
             Units.MINUTE -> {
-                if (this.minute >= minute) {
+                if (this.minute >= amount) {
                     this.minute -= amount
                 } else {
-                    var hoursToSubtract = 0
                     var minutesToSubtract = 0
+                    var hoursToSubtract = 0
                     if (amount > 60) {
                         minutesToSubtract = amount % 60
                         hoursToSubtract = (amount - minutesToSubtract) / 60
                     } else {
-                        hoursToSubtract++
-                        minutesToSubtract = amount - this.minute
-                        this.minute = 0
+                        minutesToSubtract = amount
                     }
-                    this.hour -= hoursToSubtract
+                    if (minutesToSubtract >= this.minute) {
+                        hoursToSubtract++
+                        minutesToSubtract -= this.minute
+                        this.minute = 60
+                    }
+                    this.reduceBy(hoursToSubtract, Units.HOUR)
                     this.reduceBy(minutesToSubtract, Units.MINUTE)
                 }
             }

@@ -108,4 +108,39 @@ class DateAndTimeTest {
         assertThat(date1).isEqualTo(compareDate)
     }
 
+    @Test
+    fun `reduce hour by 1`() {
+        date5.reduceBy(1, DateAndTime.Units.HOUR)
+        val compareDate = DateAndTime(1,1,2000,13,0)
+        assertThat(date5).isEqualTo(compareDate)
+    }
+
+    @Test
+    fun `reduce hour by 10 into previous day`() {
+        date3.reduceBy(10, DateAndTime.Units.HOUR)
+        val compareDate = DateAndTime(7,5,2005,14,0)
+        assertThat(date3).isEqualTo(compareDate)
+    }
+
+    @Test
+    fun `reduce hour by 10 into previous year`() {
+        date1.reduceBy(10, DateAndTime.Units.HOUR)
+        val compareDate = DateAndTime(31,12,1999,14,0)
+        assertThat(date1).isEqualTo(compareDate)
+    }
+
+    @Test
+    fun `reduce minutes by 10 into previous hour`() {
+        date5.reduceBy(10,DateAndTime.Units.MINUTE)
+        val compareDate = DateAndTime(1,1,2000,13,50)
+        assertThat(date5).isEqualTo(compareDate)
+    }
+
+    @Test
+    fun `reduce minutes by 10 into previous year`() {
+        date1.reduceBy(10, DateAndTime.Units.MINUTE)
+        val compareDate = DateAndTime(31,12,1999,23,50)
+        assertThat(date1).isEqualTo(compareDate)
+    }
+
 }
