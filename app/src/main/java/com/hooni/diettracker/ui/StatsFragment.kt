@@ -125,7 +125,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             val weight = stat.weight
             val waist = stat.waist
             val kCal = stat.kCal
-            val dateAndTime = DateAndTime.fromString(stat.date, stat.time)
+            val dateAndTime = stat.dateAndTime
 
             mainViewModel.setDateAndTime(dateAndTime)
             mainViewModel.weight.value = weight.toString()
@@ -267,9 +267,10 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
         val startDateAndTime = DateAndTime.fromString(startingDate.text.toString())
         val endDateAndTime = DateAndTime.fromString(endingDate.text.toString())
+        endDateAndTime.reduceBy(-1, DateAndTime.Units.DAY)
 
         val resultList = stats.filter {
-            DateAndTime.fromString(it.date) in startDateAndTime..endDateAndTime
+            it.dateAndTime in startDateAndTime..endDateAndTime
         }
 
         resultList.forEachIndexed { index, stat ->
@@ -277,7 +278,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             entries.add(entry)
         }
         val xAxisDescriptiveValues = resultList.map { stat ->
-            stat.date.substringBeforeLast(".")
+            stat.dateAndTime.getDateString().substringBeforeLast(".")
         }
         val valueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
@@ -303,7 +304,7 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         mainViewModel.stats.observe(viewLifecycleOwner, { statList ->
             stats.clear()
             stats.addAll(statList)
-            stats.sortBy { it.date }
+            stats.sortBy { it.dateAndTime }
             statsAdapter.notifyDataSetChanged()
             updateDateFilter()
             updateGraphData()

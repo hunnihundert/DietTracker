@@ -1,5 +1,6 @@
 package com.hooni.diettracker.ui.adapter
 
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
@@ -10,7 +11,7 @@ import com.hooni.diettracker.util.DateAndTime
 
 class StatsAdapter(private val stats: MutableList<Stat>, private val editClickListener: (Stat) -> Unit): RecyclerView.Adapter<StatsViewHolder>(), Filterable {
     var tracker: SelectionTracker<Long>? = null
-    var displayedStats = mutableListOf<Stat>()
+    var displayedStats: List<Stat>
 
     init {
         displayedStats = stats
@@ -42,18 +43,21 @@ class StatsAdapter(private val stats: MutableList<Stat>, private val editClickLi
                 val endDate = constraint.toString().substringAfter("///")
                 val startDateAndTime = DateAndTime.fromString(startDate)
                 val endDateAndTime = DateAndTime.fromString(endDate)
-
+                endDateAndTime.reduceBy(-1, DateAndTime.Units.DAY)
                 val resultList = stats.filter {
-                    DateAndTime.fromString(it.date) in startDateAndTime..endDateAndTime
+                    it.dateAndTime in startDateAndTime..endDateAndTime
                 }
                 val filterResults =  FilterResults()
-                filterResults.values = resultList
+                filterResults.values = resultList.sortedBy { stat ->
+                    stat.dateAndTime
+                }
+                Log.d(TAG, "performFiltering: ${filterResults.values}")
                 return filterResults
             }
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                displayedStats = results?.values as MutableList<Stat>
+                displayedStats = results?.values as List<Stat>
                 notifyDataSetChanged()
             }
         }
