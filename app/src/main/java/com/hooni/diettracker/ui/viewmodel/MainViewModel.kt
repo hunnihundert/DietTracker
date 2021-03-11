@@ -107,11 +107,12 @@ class MainViewModel(private val repository: Repository, application: Application
         } else {
 
             val newStat: Stat
+            val dateAndTime = DateAndTime.fromString(date, time)
             if(editStatId == null) {
-                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), date, time)
+                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), dateAndTime)
                 insertStatIntoDatabase(newStat)
             } else {
-                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), date, time, editStatId!!)
+                newStat = Stat(weight.toDouble(), waist.toDouble(), kCal.toDouble(), dateAndTime, editStatId!!)
                 updateStat(newStat)
                 editStatId = null
             }
