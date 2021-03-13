@@ -2,6 +2,7 @@ package com.hooni.diettracker.ui
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.DatePicker
 import android.widget.TextView
@@ -17,6 +18,7 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -252,7 +254,6 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     private fun setGraphAxisStyling() {
-        graph.axisRight.isEnabled = false
         graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
     }
 
@@ -263,23 +264,28 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     private fun setGraphData() {
-        val entries = mutableListOf<Entry>()
+        val waistEntries = mutableListOf<Entry>()
+        val weightEntries = mutableListOf<Entry>()
 
         val startDateAndTime = DateAndTime.fromString(startingDate.text.toString())
         val endDateAndTime = DateAndTime.fromString(endingDate.text.toString(),LAST_TIME_OF_THE_DAY)
 
-        val resultList = stats.filter {
+        val statsWithinDateRange = stats.filter {
             it.dateAndTime in startDateAndTime..endDateAndTime
         }
 
-        resultList.forEachIndexed { index, stat ->
-            val entry = Entry(index.toFloat(), stat.waist.toFloat())
-            entries.add(entry)
+        statsWithinDateRange.forEachIndexed { index, stat ->
+            val waistEntry = Entry(index.toFloat(), stat.waist.toFloat())
+            val weightEntry = Entry(index.toFloat(), stat.weight.toFloat())
+            waistEntries.add(waistEntry)
+            weightEntries.add(weightEntry)
         }
-        val xAxisDescriptiveValues = resultList.map { stat ->
+
+        val xAxisDescriptiveValues = statsWithinDateRange.map { stat ->
             stat.dateAndTime.getDateString().substringBeforeLast(".")
         }
-        val valueFormatter = object : ValueFormatter() {
+
+        val xAxisValueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
                 if (value < 0f || value.toInt() >= xAxisDescriptiveValues.size) {
                     if (xAxisDescriptiveValues.size == 1) return ""
@@ -289,14 +295,31 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             }
         }
 
-        val xAxis = graph.xAxis
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = valueFormatter
+        val leftYAxisValueFormatter = object : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                return "%.1f".format(value)
+            }
+        }
 
-        val lineDataSet = LineDataSet(entries, "Waist")
-        val dataSet = mutableListOf<ILineDataSet>()
-        dataSet.add(lineDataSet)
-        graph.data = LineData(dataSet)
+        val xAxis = graph.xAxis
+        val leftYAxis = graph.axisLeft
+        val rightYAxis = graph.axisRight
+        xAxis.granularity = 0.1f
+        xAxis.valueFormatter = xAxisValueFormatter
+        leftYAxis.granularity = 0.1f
+        leftYAxis.valueFormatter = leftYAxisValueFormatter
+        leftYAxis.setDrawGridLines(false)
+        rightYAxis.setDrawGridLines(false)
+
+        val waistLineDataSet = LineDataSet(waistEntries, "Waist")
+        val weightLineDataSet = LineDataSet(weightEntries, "Weight")
+        weightLineDataSet.axisDependency = YAxis.AxisDependency.RIGHT
+        val waistDataSet = mutableListOf<ILineDataSet>()
+        waistLineDataSet.color = R.color.design_default_color_primary
+        waistDataSet.add(waistLineDataSet)
+        waistDataSet.add(weightLineDataSet)
+        graph.data = LineData(waistDataSet)
+
     }
 
     private fun initObserver() {
