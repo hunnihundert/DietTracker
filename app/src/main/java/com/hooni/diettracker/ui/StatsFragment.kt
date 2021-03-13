@@ -2,6 +2,7 @@ package com.hooni.diettracker.ui
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.DatePicker
 import android.widget.TextView
@@ -21,7 +22,9 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.hooni.diettracker.R
@@ -266,7 +269,8 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         val entries = mutableListOf<Entry>()
 
         val startDateAndTime = DateAndTime.fromString(startingDate.text.toString())
-        val endDateAndTime = DateAndTime.fromString(endingDate.text.toString(),LAST_TIME_OF_THE_DAY)
+        val endDateAndTime =
+            DateAndTime.fromString(endingDate.text.toString(), LAST_TIME_OF_THE_DAY)
 
         val resultList = stats.filter {
             it.dateAndTime in startDateAndTime..endDateAndTime
@@ -295,8 +299,22 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
 
         val lineDataSet = LineDataSet(entries, "Waist")
         val dataSet = mutableListOf<ILineDataSet>()
+        formatLineData(lineDataSet)
         dataSet.add(lineDataSet)
         graph.data = LineData(dataSet)
+    }
+
+    private fun formatLineData(lineDataSet: LineDataSet) {
+        val dataValueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return "%.1f".format(value)
+            }
+        }
+        lineDataSet.valueTextSize = 12f
+        lineDataSet.circleRadius = 5f
+        lineDataSet.circleHoleColor
+        lineDataSet.lineWidth = 3f
+        lineDataSet.valueFormatter = dataValueFormatter
     }
 
     private fun initObserver() {
