@@ -23,7 +23,9 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.hooni.diettracker.R
@@ -268,7 +270,8 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         val weightEntries = mutableListOf<Entry>()
 
         val startDateAndTime = DateAndTime.fromString(startingDate.text.toString())
-        val endDateAndTime = DateAndTime.fromString(endingDate.text.toString(),LAST_TIME_OF_THE_DAY)
+        val endDateAndTime =
+            DateAndTime.fromString(endingDate.text.toString(), LAST_TIME_OF_THE_DAY)
 
         val statsWithinDateRange = stats.filter {
             it.dateAndTime in startDateAndTime..endDateAndTime
@@ -319,7 +322,19 @@ class StatsFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         waistDataSet.add(waistLineDataSet)
         waistDataSet.add(weightLineDataSet)
         graph.data = LineData(waistDataSet)
+    }
 
+    private fun formatLineData(lineDataSet: LineDataSet) {
+        val dataValueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return "%.1f".format(value)
+            }
+        }
+        lineDataSet.valueTextSize = 12f
+        lineDataSet.circleRadius = 5f
+        lineDataSet.circleHoleColor
+        lineDataSet.lineWidth = 3f
+        lineDataSet.valueFormatter = dataValueFormatter
     }
 
     private fun initObserver() {
