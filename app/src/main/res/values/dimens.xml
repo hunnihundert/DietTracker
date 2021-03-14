@@ -3,5 +3,5 @@
     <dimen name="textSize_listItem_stat">16sp</dimen>
     <dimen name="textSize_listItem_date">20sp</dimen>
     <dimen name="textSize_stats_date">24sp</dimen>
-    <dimen name="graph_stats_height">200dp</dimen>
+    <dimen name="graph_stats_height">400dp</dimen>
 </resources>
